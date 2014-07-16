@@ -40,11 +40,14 @@ where `map` denotes the name of the 2D map (Step 3) and `config` denotes an obje
     ```
     $ rosrun soma_manager soma.py -t /path/to/config/file <map> <config>
     ```
-5. Finally, start RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma/update` topic:
+5. Start RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma/update` topic:
 
   ```
   $ rosrun rviz rviz
   ```
+6. Add, delete, move, and rotate object in RVIZ using the interactive marker and the context menu (right-mouse-click)
+
+![marker](https://github.com/kunzel/soma/blob/master/doc/soma_manager.png)
 
 
 
