@@ -2,7 +2,8 @@
 
 import roslib; roslib.load_manifest("soma_manager")
 import rospy
-
+from rospkg import RosPack
+import json
 import argparse
 import random
 import copy
@@ -60,11 +61,18 @@ def b_func(x):
 
 class SOMAManager():
 
-    def __init__(self, soma_map, soma_conf):
+    def __init__(self, soma_map, soma_conf, config_file=None):
 
         self.soma_map = soma_map
         self.soma_conf = soma_conf
-
+        if config_file:
+            self._config_file = config_file
+        else:
+            # default file
+            rp = RosPack()
+            path = rp.get_path('soma_objects') + '/config/'
+            filename = 'default.json'
+            self._config_file=path+filename
         self._soma_obj_ids = dict()
         self._soma_obj_msg = dict()
 
@@ -85,13 +93,13 @@ class SOMAManager():
 
     def _init_types(self):
         # read from config in soma_objects 
-
-        self.mesh = dict()
-        self.mesh['Chair'] = "package://soma_objects/meshes/chair.dae"
-        self.mesh['Shelf (small)'] = "package://soma_objects/meshes/shelf_small.dae"
-        self.mesh['Table'] = "package://soma_objects/meshes/table.dae"
-        self.mesh['Drawer'] = "package://soma_objects/meshes/drawer.dae"
         
+        with open(self._config_file) as config_file:
+            config = json.load(config_file)
+
+            self.mesh = dict()
+            for k, v in config['mesh'].iteritems():
+                self.mesh[k] = v
 
     def _init_menu(self):
 
@@ -287,12 +295,13 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(prog='soma.py')
     parser.add_argument("map", nargs=1, help='Name of the used 2D map')
     parser.add_argument("conf", nargs=1, help='Name of the object configuration')
-
+    parser.add_argument('-t', metavar='config-file')
+                        
     args = parser.parse_args()
     
     rospy.init_node("soma")
-    rospy.loginfo("Running SOMA (map: %s, conf: %s)", args.map[0], args.conf[0])
-    SOMAManager(args.map[0], args.conf[0])
+    rospy.loginfo("Running SOMA (map: %s, conf: %s, types: %s)", args.map[0], args.conf[0], args.t)
+    SOMAManager(args.map[0], args.conf[0],args.t)
     
 
 
