@@ -68,6 +68,8 @@ class SOMAManager():
         self._soma_obj_ids = dict()
         self._soma_obj_msg = dict()
 
+        self._interactive = True
+
         self._msg_store=MessageStoreProxy(collection="soma")
         
         self._server = InteractiveMarkerServer("soma")
@@ -84,11 +86,11 @@ class SOMAManager():
     def _init_types(self):
         # read from config in soma_objects 
 
-        self.type = dict()
-        self.type['Chair'] = "package://soma_objects/meshes/chair.dae"
-        self.type['Shelf (small)'] = "package://soma_objects/meshes/shelf_small.dae"
-        self.type['Table'] = "package://soma_objects/meshes/table.dae"
-        self.type['Drawer'] = "package://soma_objects/meshes/drawer.dae"
+        self.mesh = dict()
+        self.mesh['Chair'] = "package://soma_objects/meshes/chair.dae"
+        self.mesh['Shelf (small)'] = "package://soma_objects/meshes/shelf_small.dae"
+        self.mesh['Table'] = "package://soma_objects/meshes/table.dae"
+        self.mesh['Drawer'] = "package://soma_objects/meshes/drawer.dae"
         
 
     def _init_menu(self):
@@ -97,11 +99,15 @@ class SOMAManager():
         add_entry = self.menu_handler.insert( "Add object" )
 
         self.menu_item = dict()
-        for i, k in enumerate(self.type):
+        for i, k in enumerate(self.mesh):
             entry =  self.menu_handler.insert(k, parent=add_entry, callback=self._add_cb)
             self.menu_item[entry] = k
             
         del_entry =  self.menu_handler.insert( "Delete object", callback=self._del_cb)
+
+        enable_entry = self.menu_handler.insert( "Movement control", callback=self._enable_cb )
+
+        self.menu_handler.setCheckState( enable_entry, MenuHandler.CHECKED )
 
     def _add_cb(self, feedback):
         rospy.loginfo("Add marker: %s", self.menu_item[feedback.menu_entry_id])
@@ -121,7 +127,22 @@ class SOMAManager():
                 Timer(3, self.update_object, [feedback]))
         getattr(self, "vp_timer_"+feedback.marker_name).start()        
         
+    def _enable_cb(self, feedback):
+        handle = feedback.menu_entry_id
+        state = self.menu_handler.getCheckState( handle )
 
+        if state == MenuHandler.CHECKED:
+            self.menu_handler.setCheckState( handle, MenuHandler.UNCHECKED )
+            self._interactive = False
+        else:
+            self.menu_handler.setCheckState( handle, MenuHandler.CHECKED )
+            self._interactive = True
+
+        self.menu_handler.reApply( self._server )
+
+        self.load_objects()
+        
+        self._server.applyChanges()
         
     def _next_id(self):
         self._soma_id += 1
@@ -129,7 +150,8 @@ class SOMAManager():
 
     def _retrieve_objects(self):
 
-        objs = self._msg_store.query(SOMAObject._type)
+        objs = self._msg_store.query(SOMAObject._type, message_query={"map": self.soma_map,
+                                                                      "config": self.soma_conf})
 
         max_id = 0
         for o,om in objs:
@@ -177,6 +199,8 @@ class SOMAManager():
         soma_obj.config = str(self.soma_conf)
         soma_obj.type = soma_type
         soma_obj.pose = pose
+        soma_obj.frame = '/map'
+        soma_obj.mesh = self.mesh[soma_type]
 
         _id = self._msg_store.insert(soma_obj)
         self._soma_obj_ids[soma_obj.id] = _id
@@ -227,7 +251,7 @@ class SOMAManager():
         mesh_marker.color.b = b_func(val)
         mesh_marker.color.a = 1.0
         #mesh_marker.pose = pose
-        mesh_marker.mesh_resource = self.type[soma_type]
+        mesh_marker.mesh_resource = self.mesh[soma_type]
 
         # create a control which will move the box
         # this control does not contain any markers,
@@ -238,10 +262,11 @@ class SOMAManager():
         control.orientation.y = 1
         control.orientation.z = 0
         control.interaction_mode = InteractiveMarkerControl.MOVE_ROTATE
-        int_marker.controls.append(copy.deepcopy(control))
 
-        # add the control to the interactive marker
-        int_marker.controls.append(control);
+        if self._interactive:
+            int_marker.controls.append(copy.deepcopy(control))
+            # add the control to the interactive marker
+            int_marker.controls.append(control);
 
         # add menu control
         menu_control = InteractiveMarkerControl()
@@ -257,6 +282,8 @@ class SOMAManager():
 
 if __name__=="__main__":
 
+    # TODO: add list command
+    
     parser = argparse.ArgumentParser(prog='soma.py')
     parser.add_argument("map", nargs=1, help='Name of the used 2D map')
     parser.add_argument("conf", nargs=1, help='Name of the object configuration')
@@ -265,7 +292,7 @@ if __name__=="__main__":
     
     rospy.init_node("soma")
     rospy.loginfo("Running SOMA (map: %s, conf: %s)", args.map[0], args.conf[0])
-    SOMAManager(args.map, args.conf)
+    SOMAManager(args.map[0], args.conf[0])
     
 
 
