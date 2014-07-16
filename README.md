@@ -1,7 +1,7 @@
 soma
 ====
 
-A toolbox for managing Semantic Object Maps (SOMA).
+A toolbox for managing Semantic Object Maps (SOMA). The soma manager visualizes a SOMA in RVIZ where the user can add, delete, move, and rotate objects interactively. The object configuration is immediately stored and updated in the ROS datacentre (MongoDB).  
 
 
 Prerequisites
