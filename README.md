@@ -45,7 +45,7 @@ where `map` denotes the name of the 2D map (Step 3) and `config` denotes an obje
   ```
   $ rosrun rviz rviz
   ```
-6. Add, delete, move, and rotate object in RVIZ using the interactive marker and the context menu (right-mouse-click)
+6. Add, delete, move, and rotate objects in RVIZ using the interactive marker and the context menu (right-mouse-click)
 
 ![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/soma_manager.png)
 
