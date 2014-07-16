@@ -38,9 +38,9 @@ where `map.yaml` specifies the map you want to load.
 where `map` denotes the name of the 2D map (Step 3) and `config` denotes an object configuration within this map. By default, the configuration file `soma_objects/config/default.json` is used to initialize the list of available object types. Alternatively, the following command can be used to use a different configuration file:
 
     ```
-    rosrun soma_manager soma.py -t /path/to/config/file <map> <config>
+    $ rosrun soma_manager soma.py -t /path/to/config/file <map> <config>
     ```
-5. Finally, start RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma/update` topic.
+5. Finally, start RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma/update` topic:
 
   ```
   $ rosrun rviz rviz
