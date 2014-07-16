@@ -47,7 +47,7 @@ where `map` denotes the name of the 2D map (Step 3) and `config` denotes an obje
   ```
 6. Add, delete, move, and rotate object in RVIZ using the interactive marker and the context menu (right-mouse-click)
 
-![marker](https://github.com/kunzel/soma/blob/master/doc/soma_manager.png)
+![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/soma_manager.png)
 
 
 
