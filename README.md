@@ -12,8 +12,8 @@ Prerequisites
 - ROS's navigation stack 
 
 
-Getting started
----------------
+SOMA Object Manager
+-------------------
 1. Start the ros core:
 
     ```
@@ -47,9 +47,12 @@ where `map` denotes the name of the 2D map (Step 3) and `config` denotes an obje
   ```
 6. Add, delete, move, and rotate objects in RVIZ using the interactive marker and the context menu (right-mouse-click)
 
-![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/soma_manager.png)
+![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_manager.png)
 
+SOMA ROI Manager
+----------------
 
+![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_roi.png)
 
 
 
