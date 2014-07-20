@@ -391,7 +391,7 @@ class SOMAROIManager():
         return int_marker
 
     def create_roi_marker(self, roi, soma_type, pose, points):
-        print "POINTS: " + str(points)
+        #print "POINTS: " + str(points)
         int_marker = InteractiveMarker()
         int_marker.header.frame_id = "/map"
         int_marker.name = "ROI-" + roi
