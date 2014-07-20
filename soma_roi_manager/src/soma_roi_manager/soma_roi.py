@@ -15,6 +15,7 @@ from visualization_msgs.msg import Marker, InteractiveMarkerControl
 from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
 from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Point
 
 from soma_msgs.msg import SOMAROIObject
 from bson.objectid import ObjectId
@@ -78,6 +79,7 @@ class SOMAROIManager():
         self._soma_obj_roi_ids = dict()
         self._soma_obj_roi = dict()
         self._soma_obj_type = dict()
+        self._soma_obj_pose = dict()
 
         self._interactive = True
 
@@ -107,6 +109,11 @@ class SOMAROIManager():
     def _init_menu(self):
 
         self.menu_handler = MenuHandler()
+
+        add_point_entry = self.menu_handler.insert( "Add Point", callback=self._add_point_cb)
+        del_point_entry = self.menu_handler.insert( "Delete Point", callback=self._del_point_cb)
+
+
         add_entry = self.menu_handler.insert( "Add ROI" )
 
         self.menu_item = dict()
@@ -116,8 +123,6 @@ class SOMAROIManager():
             
         del_entry =  self.menu_handler.insert( "Delete ROI", callback=self._del_cb)
 
-        add_point_entry = self.menu_handler.insert( "Add Point", callback=self._add_point_cb)
-        del_point_entry = self.menu_handler.insert( "Delete Point", callback=self._del_point_cb)
         
         enable_entry = self.menu_handler.insert( "Movement control", callback=self._enable_cb )
         self.menu_handler.setCheckState( enable_entry, MenuHandler.CHECKED )
@@ -130,24 +135,33 @@ class SOMAROIManager():
         rospy.loginfo("Delete ROI: %s", feedback.marker_name)
         roi = self._soma_obj_roi[feedback.marker_name]
         for r in self._soma_obj_roi_ids[roi]:
-            self.delete_object(r)        
+            self.delete_object(r)
+        self.undraw_roi(roi)
 
     def _add_point_cb(self, feedback):
         rospy.loginfo("Add point: %s", feedback.marker_name)
         roi = self._soma_obj_roi[feedback.marker_name]
         t   = self._soma_obj_type[feedback.marker_name]
-        print t, roi
         self.add_object(t, feedback.pose, roi)
+        #self.draw_roi(roi)
 
     def _del_point_cb(self, feedback):
         rospy.loginfo("Delete point: %s", feedback.marker_name)
-        self.delete_object(feedback.marker_name)        
+        self.delete_object(feedback.marker_name)
+        roi = self._soma_obj_roi[feedback.marker_name]
+        self.draw_roi(roi)
 
+    def _update_poly(self, feedback):
+        return
     
     def _update_cb(self, feedback):
         p = feedback.pose.position
-        print "Marker " + feedback.marker_name + " is now at " + str(p.x) + ", " + str(p.y)
-        
+        #print "Marker " + feedback.marker_name + " is now at " + str(p.x) + ", " + str(p.y)
+        self._soma_obj_pose[feedback.marker_name] = feedback.pose
+
+        roi = self._soma_obj_roi[feedback.marker_name]
+        self.draw_roi(roi)
+
         if hasattr(self, "vp_timer_"+feedback.marker_name):
             getattr(self, "vp_timer_"+feedback.marker_name).cancel()        
         setattr(self, "vp_timer_"+feedback.marker_name,
@@ -218,9 +232,32 @@ class SOMAROIManager():
                 
             self._soma_obj_roi[o.id] = o.roi_id
             self._soma_obj_type[o.id] = o.type
-        
+            self._soma_obj_pose[o.id] = o.pose
+            
             self.load_object(o.id, o.roi_id, o.type, o.pose)
 
+        self.draw_all_roi()
+
+    def draw_all_roi(self):
+
+        for key  in self._soma_obj_roi_ids:
+            self.draw_roi(key)
+
+    def draw_roi(self, roi):
+        
+        v = self._soma_obj_roi_ids[roi]
+        t = self._soma_obj_type[v[0]]
+        p = self._soma_obj_pose[v[0]]
+        int_marker = self.create_roi_marker(roi, t, p, v)
+        
+        self._server.erase("ROI-" + roi)
+        self._server.applyChanges()
+        self._server.insert(int_marker, self._update_poly)
+        self._server.applyChanges()
+
+    def undraw_roi(self, roi):
+        self._server.erase("ROI-" + roi)
+        self._server.applyChanges()
 
     def load_object(self, soma_id, roi, soma_type, pose):
 
@@ -243,8 +280,6 @@ class SOMAROIManager():
         else:
             soma_roi_id = roi_id
 
-        print soma_id, soma_roi_id
-        
         soma_obj = SOMAROIObject()
         soma_obj.id = str(soma_id)
         soma_obj.roi_id = str(soma_roi_id)
@@ -261,6 +296,7 @@ class SOMAROIManager():
         self._soma_obj_roi_ids[soma_obj.roi_id].append(soma_obj.id)
         self._soma_obj_roi[soma_obj.id] = soma_obj.roi_id
         self._soma_obj_type[soma_obj.id] = soma_type
+        self._soma_obj_pose[soma_obj.id] = pose
         
         self.load_object(str(soma_id), soma_obj.roi_id, soma_type, pose)
 
@@ -273,17 +309,29 @@ class SOMAROIManager():
         
         self._server.erase(soma_id)
         self._server.applyChanges()
+
+        roi = self._soma_obj_roi[str(soma_id)]
+        nodes = self._soma_obj_roi_ids[roi]
+        new_nodes = []
+        for n in nodes:
+            if n != str(soma_id):
+                new_nodes.append(n)
+        self._soma_obj_roi_ids[roi] = new_nodes
+    
         
     def update_object(self, feedback):
-        print "Updated marker " + feedback.marker_name
+        rospy.loginfo("Updated marker: %s", feedback.marker_name)
 
         _id = self._soma_obj_ids[feedback.marker_name]
         msg = self._soma_obj_msg[feedback.marker_name]
 
         new_msg = copy.deepcopy(msg)
         new_msg.pose = feedback.pose
+
+        self._soma_obj_pose[feedback.marker_name] = feedback.pose
         
-        self._msg_store.update_id(_id, new_msg)  
+        self._msg_store.update_id(_id, new_msg)
+
         
 
     def create_object_marker(self, soma_obj, roi, soma_type, pose):
@@ -294,20 +342,20 @@ class SOMAROIManager():
         int_marker.description = soma_type + ' (' + roi +  ')'
         int_marker.pose = pose
         
-        mesh_marker = Marker()
-        mesh_marker.type = Marker.SPHERE
-        mesh_marker.scale.x = 0.25
-        mesh_marker.scale.y = 0.25
-        mesh_marker.scale.z = 0.25
-        int_marker.pose.position.z = (mesh_marker.scale.z / 2)
+        marker = Marker()
+        marker.type = Marker.SPHERE
+        marker.scale.x = 0.25
+        marker.scale.y = 0.25
+        marker.scale.z = 0.25
+        int_marker.pose.position.z = (marker.scale.z / 2)
         
         random.seed(soma_type)
         val = random.random()
-        mesh_marker.color.r = r_func(val)
-        mesh_marker.color.g = g_func(val)
-        mesh_marker.color.b = b_func(val)
-        mesh_marker.color.a = 1.0
-        #mesh_marker.pose = pose
+        marker.color.r = r_func(val)
+        marker.color.g = g_func(val)
+        marker.color.b = b_func(val)
+        marker.color.a = 1.0
+        #marker.pose = pose
         # create a control which will move the box
         # this control does not contain any markers,
         # which will cause RViz to insert two arrows
@@ -329,10 +377,51 @@ class SOMAROIManager():
         menu_control.interaction_mode = InteractiveMarkerControl.BUTTON
         menu_control.always_visible = True
         
-        menu_control.markers.append( mesh_marker) #makeBox(int_marker) )
+        menu_control.markers.append( marker) #makeBox(int_marker) )
         int_marker.controls.append(menu_control)
 
         return int_marker
+
+    def create_roi_marker(self, roi, soma_type, pose, points):
+        int_marker = InteractiveMarker()
+        int_marker.header.frame_id = "/map"
+        int_marker.name = "ROI-" + roi
+        int_marker.description = roi
+        int_marker.pose = pose
+        
+        marker = Marker()
+        marker.type = Marker.LINE_STRIP
+        marker.scale.x = 0.1
+        
+        random.seed(soma_type)
+        val = random.random()
+        marker.color.r = r_func(val)
+        marker.color.g = g_func(val)
+        marker.color.b = b_func(val)
+        marker.color.a = 1.0
+
+        control = InteractiveMarkerControl()
+        control.always_visible = True
+        control.markers.append( marker )
+
+        int_marker.controls.append(control )
+        
+        marker.points = []
+        for point in points:
+            p = Point()
+            pose = self._soma_obj_pose[point]
+            p.x = pose.position.x - int_marker.pose.position.x  
+            p.y = pose.position.y - int_marker.pose.position.y
+            marker.points.append(p)
+
+        p = Point()
+        pose = self._soma_obj_pose[points[0]]
+        p.x = pose.position.x - int_marker.pose.position.x  
+        p.y = pose.position.y - int_marker.pose.position.y
+        marker.points.append(p)
+
+        return int_marker
+
 
     
         
