@@ -20,8 +20,8 @@ from soma_msgs.msg import SOMAObject
 from bson.objectid import ObjectId
 
 def trapezoidal_shaped_func(a, b, c, d, x):
-  min_val = min(min((x - a)/(b - a), float(1.0)), (d - x)/(d - c))
-  return max(min_val, float(0.0))
+    min_val = min(min((x - a)/(b - a), float(1.0)), (d - x)/(d - c))
+    return max(min_val, float(0.0))
 
 
 def r_func(x):
