@@ -1,0 +1,9 @@
+{ 
+  "roi": {
+	        "Office" : "",  
+          "Shared office" : "",      
+  	      "Meeting room" : "",
+          "Common room" : "",
+          "Resource room" : ""                    
+  }
+}
