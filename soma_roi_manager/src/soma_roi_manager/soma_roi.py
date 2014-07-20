@@ -212,6 +212,9 @@ class SOMAROIManager():
     
     def load_objects(self):
 
+
+        self._soma_obj_roi_ids = dict()
+        
         objs = self._retrieve_objects()
 
         # if collection is empty insert initial object
@@ -242,6 +245,11 @@ class SOMAROIManager():
 
         for key  in self._soma_obj_roi_ids:
             self.draw_roi(key)
+
+    def undraw_all_roi(self):
+
+        for key  in self._soma_obj_roi_ids:
+            self.undraw_roi(key)
 
     def draw_roi(self, roi):
         
@@ -383,6 +391,7 @@ class SOMAROIManager():
         return int_marker
 
     def create_roi_marker(self, roi, soma_type, pose, points):
+        print "POINTS: " + str(points)
         int_marker = InteractiveMarker()
         int_marker.header.frame_id = "/map"
         int_marker.name = "ROI-" + roi
