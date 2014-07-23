@@ -135,7 +135,7 @@ class SOMAManager():
 
     def _update_cb(self, feedback):
         p = feedback.pose.position
-        print "Marker " + feedback.marker_name + " is now at " + str(p.x) + ", " + str(p.y)
+        print "Marker " + feedback.marker_name + " position: " + str(round(p.x,2)) + ", " + str(round(p.y,2)) +  ", " + str(round(p.z,2))
         
         if hasattr(self, "vp_timer_"+feedback.marker_name):
             getattr(self, "vp_timer_"+feedback.marker_name).cancel()        
@@ -215,6 +215,7 @@ class SOMAManager():
         soma_obj.config = str(self.soma_conf)
         soma_obj.type = soma_type
         soma_obj.pose = pose
+        soma_obj.pose.position.z = 0.0
         soma_obj.frame = '/map'
         soma_obj.mesh = self.mesh[soma_type]
 
@@ -222,7 +223,7 @@ class SOMAManager():
         self._soma_obj_ids[soma_obj.id] = _id
         self._soma_obj_msg[soma_obj.id] = soma_obj
         
-        self.load_object(str(soma_id), soma_type, pose)
+        self.load_object(str(soma_id), soma_type, soma_obj.pose)
 
 
     def delete_object(self, soma_id):
