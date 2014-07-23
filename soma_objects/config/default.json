@@ -1,8 +1,12 @@
 { 
-  "mesh": {
-	        "Chair" : "package://soma_objects/meshes/chair.dae",  
+
+  "2D": {
+	        "Desk" : "package://soma_objects/meshes/desk.dae",          
   	      "Table" : "package://soma_objects/meshes/table.dae",
           "Shelf (small)" : "package://soma_objects/meshes/shelf_small.dae",
           "Drawer" : "package://soma_objects/meshes/drawer.dae"                    
-  }
+  },
+  "3D": {
+	        "Chair" : "package://soma_objects/meshes/chair.dae"
+  }         
 }

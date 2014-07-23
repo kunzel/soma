@@ -98,8 +98,16 @@ class SOMAManager():
             config = json.load(config_file)
 
             self.mesh = dict()
-            for k, v in config['mesh'].iteritems():
-                self.mesh[k] = v
+            self.marker = dict()
+            if '2D' in config:
+                for k, v in config['2D'].iteritems():
+                    self.mesh[k] = v
+                    self.marker[k] = '2D'
+
+            if '3D' in config:
+                for k, v in config['3D'].iteritems():
+                    self.mesh[k] = v
+                    self.marker[k] = '3D'
 
     def _init_menu(self):
 
@@ -271,10 +279,13 @@ class SOMAManager():
         control.orientation.z = 0
         control.interaction_mode = InteractiveMarkerControl.MOVE_ROTATE
 
+        
         if self._interactive:
             int_marker.controls.append(copy.deepcopy(control))
             # add the control to the interactive marker
-            int_marker.controls.append(control);
+            if self.marker[soma_type] == '3D':
+                control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+                int_marker.controls.append(control)
 
         # add menu control
         menu_control = InteractiveMarkerControl()
