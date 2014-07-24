@@ -1,12 +1,24 @@
 { 
-
   "2D": {
-	        "Desk" : "package://soma_objects/meshes/desk.dae",          
-  	      "Table" : "package://soma_objects/meshes/table.dae",
-          "Shelf (small)" : "package://soma_objects/meshes/shelf_small.dae",
-          "Drawer" : "package://soma_objects/meshes/drawer.dae"                    
-  },
+"Chair" : "package://soma_objects/meshes/chair.dae",  
+"Table" : "package://soma_objects/meshes/table.dae",
+"Shelf (small)" : "package://soma_objects/meshes/shelf_small.dae",
+"Shelf (large)" : "package://soma_objects/meshes/shelf_large.dae",
+"Drawer" : "package://soma_objects/meshes/drawer.dae",                   
+"Sofa" : "package://soma_objects/meshes/sofa.dae",
+"Plant (wide)" : "package://soma_objects/meshes/plant_wide.dae",
+"Armchair" : "package://soma_objects/meshes/armchair.dae",
+"Table (small)" : "package://soma_objects/meshes/table_small.dae",
+"Table (low)" : "package://soma_objects/meshes/table_low.dae",
+"Plant (tall)" : "package://soma_objects/meshes/plant_tall.dae",
+"Bin (box)" : "package://soma_objects/meshes/bin_box.dae",
+"Wooden (table)" : "package://soma_objects/meshes/wooden_table.dae",
+"Printer (photocopier)" : "package://soma_objects/meshes/printer_photocopier.dae",
+"Laptop" : "package://soma_objects/meshes/laptop.dae",
+"Laptop2" : "package://soma_objects/meshes/laptop2.dae"}
+  ,
   "3D": {
-	        "Chair" : "package://soma_objects/meshes/chair.dae"
+"Monitor" : "package://soma_objects/meshes/monitor.dae",
+"Keyboard" : "package://soma_objects/meshes/keyboard.dae"
   }         
 }
