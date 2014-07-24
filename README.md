@@ -17,8 +17,8 @@ Prerequisites
 - ROS's navigation stack 
 
 
-Getting started: general steps
-------------------------------
+Getting started (general steps)
+-------------------------------
 1. Start the ros core:
 
     ```
