@@ -1,7 +1,12 @@
 soma
 ====
 
-A toolbox for managing Semantic Object Maps (SOMA). The soma manager visualizes a SOMA in RVIZ where the user can add, delete, move, and rotate objects interactively. The object configuration is immediately stored and updated in the ROS datacentre (MongoDB).  
+A toolbox for managing Semantic Object Maps (SOMA). Currently there are two modeling tools: 
+
+- the SOMA object manager 
+- the SOMA ROI manager (ROI = regions of interest)
+ 
+The SOMA manager for objects visualizes objects in RVIZ where the user can add, delete, move, and rotate them interactively. The SOMA manager for ROIs visualizes regions in RVIZ where the user can add, delete, and modify them. Both the object and the ROI configurations are immediately stored and updated in the ROS datacentre (MongoDB).  
 
 
 Prerequisites
@@ -12,8 +17,8 @@ Prerequisites
 - ROS's navigation stack 
 
 
-SOMA Object Manager
--------------------
+Getting started: general steps
+------------------------------
 1. Start the ros core:
 
     ```
@@ -30,7 +35,17 @@ SOMA Object Manager
   ```
 where `map.yaml` specifies the map you want to load.
     
-4. Run the SOMA object manager:
+
+4. Start RVIZ, add a Map display type and subsribe to the `/map` topic:
+
+  ```
+  $ rosrun rviz rviz
+  ```
+
+SOMA object manager
+-------------------
+
+5. Run the SOMA object manager:
 
     ```
     $ rosrun soma_manager soma.py <map> <config>
@@ -40,25 +55,26 @@ where `map` denotes the name of the 2D map (Step 3) and `config` denotes an obje
     ```
     $ rosrun soma_manager soma.py -t /path/to/config/file <map> <config>
     ```
-5. Start RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma/update` topic:
-
-  ```
-  $ rosrun rviz rviz
-  ```
-6. Add, delete, move, and rotate objects in RVIZ using the interactive marker and the context menu (right-mouse-click)
+6. In RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma/update` topic:
+7. Add, delete, move, and rotate objects in RVIZ using the interactive marker and the context menu (right-mouse-click)
 
 ![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_manager.png)
 
-SOMA ROI Manager
+SOMA ROI manager
 ----------------
 
+5. Run the SOMA ROI manager:
+
+    ```
+    $ rosrun soma_roi_manager soma_roi.py <map> <config>
+    ```
+where `map` denotes the name of the 2D map (Step 3) and `config` denotes an object configuration within this map. By default, the configuration file `soma_roi_manager/config/default.json` is used to initialize the list of available ROI types. Alternatively, the following command can be used to use a different configuration file:
+
+    ```
+    $ rosrun soma_roi_manager soma_roi.py -t /path/to/config/file <map> <config>
+    ```
+6. In RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma_roi/update` topic:
+7. Add, delete, modify ROIs in RVIZ using the interactive marker and the context menu (right-mouse-click)
+
+
 ![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_roi.png)
-
-
-
-
-
-
-
-
-
