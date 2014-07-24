@@ -1,9 +1,15 @@
 { 
   "roi": {
 	        "Office" : "",  
-          "Shared office" : "",      
-  	      "Meeting room" : "",
+          "Meeting room" : "",        
+          "Resource room" : "",                    
+          "Kitchen" : "",              
+          "Library" : "",      
           "Common room" : "",
-          "Resource room" : ""                    
+          "Robot lab" : "",
+          "Eating area" : "",
+          "Atrium" : "",
+          "Reception" : "",      
+          "Hallway" : ""                        
   }
 }
