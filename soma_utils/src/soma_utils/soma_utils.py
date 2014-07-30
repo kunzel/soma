@@ -210,18 +210,27 @@ class SOMAUtils():
     def _update_poly(self,feedback):
         return
     
-    def show (self, roi):
-        print "Show: " + roi
+    def show (self, roi_id):
 
-        self.draw_roi(roi)
+        roi_ids = []
+        
+        if roi_id == None:
+            for k in self._soma_roi:
+                roi_ids.append(k)
+        else:
+            roi_ids.append(roi_id)
 
-        polygon = self._get_polygon(roi)    
-        for obj, meta in self._objs:
-            point = Point()
-            point.x = obj.pose.position.x
-            point.y = obj.pose.position.y
-            if self._inside(point,polygon):
-                self.load_object(obj.id, obj.type, obj.pose)
+        print "Visualise ROIs: " + str(roi_ids)
+                
+        for roi in roi_ids:
+            self.draw_roi(roi)
+            polygon = self._get_polygon(roi)    
+            for obj, meta in self._objs:
+                point = Point()
+                point.x = obj.pose.position.x
+                point.y = obj.pose.position.y
+                if self._inside(point,polygon):
+                    self.load_object(obj.id, obj.type, obj.pose)
     
     def list(self):
 
@@ -267,8 +276,8 @@ class SOMAUtils():
         #print "POINTS: " + str(points)
         int_marker = InteractiveMarker()
         int_marker.header.frame_id = "/map"
-        int_marker.name = "ROI-" + roi
-        int_marker.description = roi
+        int_marker.name = "ROI-" + roi 
+        int_marker.description = roi + '-' + soma_type
         int_marker.pose = pose
         
         marker = Marker()
@@ -343,7 +352,7 @@ if __name__=="__main__":
     parser.add_argument("roi_conf", nargs=1, help='Name of the ROI configuration')
     parser.add_argument("--obj_map", nargs=1,default=None, help='Name of the used object map')
     parser.add_argument("--obj_conf", nargs=1, default=None, help='Name of the object configuration')
-    parser.add_argument("-r", "--roi", nargs=1, default='0', help='ID of a ROI')
+    parser.add_argument("-r", "--roi", nargs=1, default=None, help='ID of a ROI')
 
     args = parser.parse_args()
     
@@ -362,7 +371,11 @@ if __name__=="__main__":
     if args.cmd[0] == 'list':
         soma.list()
     elif args.cmd[0] == 'show':
-        roi =  str(args.roi[0])
+        
+        roi = None
+        if not args.roi == None:
+            roi = args.roi[0]
+            
         soma.show(roi)
         rospy.spin()
         
