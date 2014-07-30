@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import roslib; roslib.load_manifest("soma_utils")
+import sys
 import rospy
 from rospkg import RosPack
 import json
@@ -13,7 +14,7 @@ from tabulate import tabulate
 from threading import Timer
 
 from ros_datacentre.message_store import MessageStoreProxy
-from geometry_msgs.msg import Pose, Point
+from geometry_msgs.msg import Pose, Point, Polygon
 
 from visualization_msgs.msg import Marker, InteractiveMarkerControl
 from interactive_markers.interactive_marker_server import *
@@ -149,7 +150,7 @@ class SOMAUtils():
 
     def _get_polygon(self,roi):
 
-        polygon = []
+        polygon = Polygon()
 
         if roi not in self._soma_roi:
             rospy.logwarn("Invalid ROI ID")
@@ -157,7 +158,11 @@ class SOMAUtils():
 
         nodes = self._soma_roi[roi]
         for n in nodes:
-            polygon.append([n.pose.position.x,n.pose.position.y])
+            p = Point()
+            p.x = n.pose.position.x
+            p.y = n.pose.position.y
+            polygon.points.append(p)
+            
         return polygon
 
     def _get_objects(self):
@@ -167,7 +172,9 @@ class SOMAUtils():
 
         obj_ids = []
         for obj, _meta in objects:
-            point = [obj.pose.position.x, obj.pose.position.y]
+            point = Point()
+            point.x = obj.pose.position.x
+            point.y = obj.pose.position.y
             if self._inside(point,polygon):
                 obj_ids.append(obj.id)
 
@@ -210,7 +217,9 @@ class SOMAUtils():
 
         polygon = self._get_polygon(roi)    
         for obj, meta in self._objs:
-            point = [obj.pose.position.x, obj.pose.position.y]
+            point = Point()
+            point.x = obj.pose.position.x
+            point.y = obj.pose.position.y
             if self._inside(point,polygon):
                 self.load_object(obj.id, obj.type, obj.pose)
     
@@ -299,7 +308,6 @@ class SOMAUtils():
     #########################################################################################    
     
     def _area(self, polygon):
-        # a polygon is formatted as follows: [[-3.2, 6.6], [-1.1, 8.4], [0.1, 7.3]]
         area = 0.0
 
         # Put your code here!
@@ -307,7 +315,6 @@ class SOMAUtils():
         return area
 
     def _center(self, polygon):
-        # a polygon is formatted as follows: [[-3.2, 6.6], [-1.1, 8.4], [0.1, 7.3]]
         center = [0.0, 0.0]
 
         # Put your code here!
@@ -315,20 +322,19 @@ class SOMAUtils():
         return center
     
     def _inside(self, point, polygon):
-        # a point is formatted as follows: [-1.2, 2.6]
-        # a polygon is formatted as follows: [[-3.2, 6.6], [-1.1, 8.4], [0.1, 7.3]]
         if not polygon:
             return False
         
         # Put your code here!
         
         # return True
-        return True
+        return False
     
     #########################################################################################    
     ### End STEM project ####################################################################
     #########################################################################################            
 
+    
 if __name__=="__main__":
 
     parser = argparse.ArgumentParser(prog='soma_utils.py')
