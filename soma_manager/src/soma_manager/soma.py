@@ -311,7 +311,7 @@ if __name__=="__main__":
                         
     args = parser.parse_args()
     
-    rospy.init_node("soma")
+    rospy.init_node("soma_obj")
     rospy.loginfo("Running SOMA (map: %s, conf: %s, types: %s)", args.map[0], args.conf[0], args.t)
     SOMAManager(args.map[0], args.conf[0],args.t)
     
