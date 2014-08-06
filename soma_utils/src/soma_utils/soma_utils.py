@@ -318,10 +318,27 @@ class SOMAUtils():
     
     def _area(self, polygon):
         area = 0.0
-
+        numOfPoints = len(polygon.points)
+	j = numOfPoints - 1
         # Put your code here!
+        # polygon.points[0]
+        #for point in polygon.points:
+	for i in range(0,len(polygon.points)):
+	    xi = polygon.points[i].x
+	    yi = polygon.points[i].y
+	    xj = polygon.points[j].x
+	    yj = polygon.points[j].y
+	    
+	    area = area + ((xi+xj) * (yj-yi))
+	    
+	    j = i
+            
         
-        return area
+        #print length
+        if area<0:
+	  area = area * -1
+        
+        return area/2
 
     def _center(self, polygon):
         center = [0.0, 0.0]
