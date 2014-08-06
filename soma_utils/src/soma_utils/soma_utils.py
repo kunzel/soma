@@ -282,7 +282,7 @@ class SOMAUtils():
         
         marker = Marker()
         marker.type = Marker.LINE_STRIP
-        marker.scale.x = 0.1
+        marker.scale.x = 0.001
         
         random.seed(soma_type)
         val = random.random()
@@ -351,11 +351,39 @@ class SOMAUtils():
         if not polygon:
             return False
         
-        # Put your code here!
-        
-        # return True
-        return False
+        return False  # is_inside(point, polygon)
+
     
+_eps = 0.00001
+
+def ray_intersect_seg(p, a, b):
+    ''' takes a point p and an edge of two endpoints a,b of a line segment returns boolean
+    '''
+    if a.y > b.y:
+        a,b = b,a
+    if p.y == a.y or p.y == b.y:
+        p = Point32(p.x, p.y + _eps, 0)
+ 
+    intersect = False
+ 
+    if (p.y > b.y or p.y < a.y) or (
+        p.x > max(a.x, b.x)):
+        return False
+ 
+    if p.x < min(a.x, b.x):
+        intersect = True
+    else:
+        if abs(a.x - b.x) > sys.float_info.min:
+            m_red = (b.y - a.y) / float(b.x - a.x)
+        else:
+            m_red = sys.float_info.max
+        if abs(a.x - p.x) > sys.float_info.min:
+            m_blue = (p.y - a.y) / float(p.x - a.x)
+        else:
+            m_blue = sys.float_info.max
+        intersect = m_blue >= m_red
+    return intersect
+ 
     #########################################################################################    
     ### End STEM project ####################################################################
     #########################################################################################            
