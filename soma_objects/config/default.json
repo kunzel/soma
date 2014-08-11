@@ -12,13 +12,22 @@
 "Table (low)" : "package://soma_objects/meshes/table_low.dae",
 "Plant (tall)" : "package://soma_objects/meshes/plant_tall.dae",
 "Bin (box)" : "package://soma_objects/meshes/bin_box.dae",
-"Wooden (table)" : "package://soma_objects/meshes/wooden_table.dae",
+"Desk (L-shaped)" : "package://soma_objects/meshes/desk_L-shaped.dae",
 "Printer (photocopier)" : "package://soma_objects/meshes/printer_photocopier.dae",
-"Laptop" : "package://soma_objects/meshes/laptop.dae",
-"Laptop2" : "package://soma_objects/meshes/laptop2.dae"}
-  ,
-  "3D": {
+"Sink (kitchen)" : "package://soma_objects/meshes/Kitchen_sink.dae",
+"Dishwasher" : "package://soma_objects/meshes/dishwasher.dae",
+"Vending (machine)" : "package://soma_objects/meshes/vending_machine.dae",
+"Bin" : "package://soma_objects/meshes/bin.dae",
+"Fridge" : "package://soma_objects/meshes/fridge.dae",
+"Desk (L-shaped mirror)" : "package://soma_objects/meshes/desk_L-shaped mirror.dae",
+"Bar (table)" : "package://soma_objects/meshes/bar_table.dae",
+"Bar (stool)" : "package://soma_objects/meshes/bar_stool.dae",
+"Cabinet (filing)" : "package://soma_objects/meshes/cabinet_filing.dae",
+"Chair (library)" : "package://soma_objects/meshes/chair_library.dae"},
+"3D": {
 "Monitor" : "package://soma_objects/meshes/monitor.dae",
-"Keyboard" : "package://soma_objects/meshes/keyboard.dae"
-  }         
+"Keyboard" : "package://soma_objects/meshes/keyboard.dae",
+"Microwave" : "package://soma_objects/meshes/microwave.dae",
+"Printer" : "package://soma_objects/meshes/printer.dae",
+"Laptop3" : "package://soma_objects/meshes/laptop3.dae"}
 }
