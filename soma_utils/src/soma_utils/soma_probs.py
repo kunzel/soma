@@ -188,8 +188,9 @@ class SOMAProbs():
     ## BEGIN STEM PROJECT ##############################################################
     
     def p_roi_given_obj(self, roi, obj):
-        # Put your code here! 
-        return 0.0 
+        
+        return ((self.p_obj_given_roi(obj,roi))*(self.p_roi(roi)))/(self.p_obj(obj)) 
+        
 
     def p_obj_and_roi(self, obj, roi):
         # Joint probability distribution
