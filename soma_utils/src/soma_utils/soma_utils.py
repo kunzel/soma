@@ -311,11 +311,7 @@ class SOMAUtils():
         marker.points.append(p)
 
         return int_marker
-        
-    #########################################################################################    
-    ### Begin STEM project ##################################################################
-    #########################################################################################    
-    
+            
     def _area(self, polygon):
         area = 0.0
         numOfPoints = len(polygon.points)
@@ -351,7 +347,7 @@ class SOMAUtils():
         if not polygon:
             return False
         
-        return False  # is_inside(point, polygon)
+        return is_inside(point, polygon.points)
 
     
 _eps = 0.00001
@@ -383,10 +379,16 @@ def ray_intersect_seg(p, a, b):
             m_blue = sys.float_info.max
         intersect = m_blue >= m_red
     return intersect
+
+def is_odd(x): return x%2 == 1
  
-    #########################################################################################    
-    ### End STEM project ####################################################################
-    #########################################################################################            
+def is_inside(p, poly):
+    ln = len(poly)
+    num_of_intersections = 0
+    for i in range(0,ln):
+        num_of_intersections += ray_intersect_seg(p, poly[i], poly[(i + 1) % ln])
+
+    return is_odd(num_of_intersections)
 
     
 if __name__=="__main__":

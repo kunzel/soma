@@ -150,7 +150,7 @@ class SOMAProbs():
                         point.x = obj[0].pose.position.x
                         point.y = obj[0].pose.position.y
 
-                        if self._soma_utils[k]._inside(point, poly.points):
+                        if self._soma_utils[k]._inside(point, poly):
                         #print k, obj[0].id, obj[0].type
                             if obj[0].type not in objT_cnt:
                                 objT_cnt[obj[0].type] = 1
@@ -171,7 +171,7 @@ class SOMAProbs():
 
         _lambda = 0.5
         
-        denominator = 0
+        denominator = 0.0
         
         if obj in obj_cnt:
             numerator = obj_cnt[obj] + _lambda
@@ -181,24 +181,29 @@ class SOMAProbs():
         for t in obj_cnt:
             denominator += obj_cnt[t]
 
-        denominator += len(self._obj_cnt) * _lambda
+        denominator += (len(self._obj_cnt) *  _lambda )
         
         return float(numerator) / float(denominator)
 
-    ## BEGIN STEM PROJECT ##############################################################
-    
     def p_roi_given_obj(self, roi, obj):
-        
-        return ((self.p_obj_given_roi(obj,roi))*(self.p_roi(roi)))/(self.p_obj(obj)) 
-        
+        # Put your code here!
+
+        num = self.p_obj_given_roi(obj, roi) * self.p_roi(roi)
+        den = 0.0 
+        for r in self._roi_cnt:
+            den +=  self.p_obj_given_roi(obj, r) * self.p_roi(r)
+
+        prob = num / den
+
+        if prob > 1:
+            print self.p_obj_given_roi(obj, roi), self.p_roi(roi), self.p_obj(obj)
+            print 'ERROR!!!!!!!!!!!!!!!!!!!!!!!', roi, obj
+        return prob
 
     def p_obj_and_roi(self, obj, roi):
         # Joint probability distribution
         # Put your code here! 
-        return 0.0 
-                                      
-
-    ## END STEM PROJECT   ##############################################################
+        return self.p_roi_given_obj(roi,obj) * self.p_obj(obj) 
     
     def list(self):
 
@@ -209,9 +214,16 @@ class SOMAProbs():
         for roi  in self._roi_cnt:
             roi_table.append([roi , self.p_roi(roi)])
 
+        total_por = 0
+        total_pro = 0
+        total_por_joint = 0
         for obj in self._obj_cnt:
             obj_table.append([obj , self.p_obj(obj)])
             for roi  in self._roi_cnt:
+                total_por += self.p_obj_given_roi(obj,roi)
+                total_pro += self.p_roi_given_obj(roi, obj)
+                total_por_joint += self.p_obj_and_roi(obj,roi)
+                
                 table.append([obj ,
                               roi,
                               self.p_obj_given_roi(obj,roi),
@@ -225,6 +237,7 @@ class SOMAProbs():
         print
         print tabulate(table, headers=['Object', 'ROI', 'P(O|R)', 'P(R|O)', 'P(O,R)'],tablefmt='rst')
 
+        print "Total: ", total_por/len(self._roi_cnt), total_pro/len(self._obj_cnt), total_por_joint
         #print 'Office', self.cnt_all_obj_inside_roi('Office')
         #print 'Library', self.cnt_all_obj_inside_roi('Library')
         #print 'Resource room', self.cnt_all_obj_inside_roi('Resource room')
