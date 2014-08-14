@@ -6,7 +6,7 @@ project(soma_utils)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
-  ros_datacentre
+  mongodb_store
   rospy
   soma_msgs
 )
@@ -83,7 +83,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES soma_utils
-#  CATKIN_DEPENDS geometry_msgs ros_datacentre rospy soma_msgs
+#  CATKIN_DEPENDS geometry_msgs mongodb_store rospy soma_msgs
 #  DEPENDS system_lib
 )
 

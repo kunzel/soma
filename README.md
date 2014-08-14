@@ -13,7 +13,7 @@ Prerequisites
 -------------
 
 - MongoDB
-- ros_datacentre
+- mongodb_store
 - ROS's navigation stack 
 
 
@@ -27,7 +27,7 @@ Getting started (general steps)
 2. Launch the ROS datacentre:
 
     ```
-    $ roslaunch ros_datacentre datacentre.launch
+    $ roslaunch mongodb_store datacentre.launch
     ```
 3. Run the map_server with a 2D map:
   ```

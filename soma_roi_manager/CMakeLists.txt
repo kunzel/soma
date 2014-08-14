@@ -7,7 +7,7 @@ project(soma_roi_manager)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   interactive_markers
-  ros_datacentre
+  mongodb_store
   rospy
   soma_msgs
   visualization_msgs
@@ -85,7 +85,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES soma_roi_manager
-#  CATKIN_DEPENDS geometry_msgs interactive_markers ros_datacentre rospy soma_msgs visualization_msgs
+#  CATKIN_DEPENDS geometry_msgs interactive_markers mongodb_store rospy soma_msgs visualization_msgs
 #  DEPENDS system_lib
 )
 

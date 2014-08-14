@@ -15,7 +15,7 @@ from tabulate import tabulate
 
 from threading import Timer
 
-from ros_datacentre.message_store import MessageStoreProxy
+from mongodb_store.message_store import MessageStoreProxy
 
 from geometry_msgs.msg import Point
 

@@ -13,7 +13,7 @@ from tabulate import tabulate
 
 from threading import Timer
 
-from ros_datacentre.message_store import MessageStoreProxy
+from mongodb_store.message_store import MessageStoreProxy
 from geometry_msgs.msg import Pose, Point, Polygon
 
 from visualization_msgs.msg import Marker, InteractiveMarkerControl

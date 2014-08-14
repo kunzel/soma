@@ -42,13 +42,13 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>interactive_markers</build_depend>
-  <build_depend>ros_datacentre</build_depend>
+  <build_depend>mongodb_store</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>soma_msgs</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>interactive_markers</run_depend>
-  <run_depend>ros_datacentre</run_depend>
+  <run_depend>mongodb_store</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>soma_msgs</run_depend>
   <run_depend>visualization_msgs</run_depend>
