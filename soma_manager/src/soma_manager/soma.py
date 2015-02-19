@@ -11,6 +11,7 @@ import copy
 from threading import Timer
 
 from mongodb_store.message_store import MessageStoreProxy
+from soma_geospatial_store.geospatial_store import GeoSpatialStoreProxy
 from visualization_msgs.msg import Marker, InteractiveMarkerControl
 from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
@@ -75,10 +76,12 @@ class SOMAManager():
             self._config_file=path+filename
         self._soma_obj_ids = dict()
         self._soma_obj_msg = dict()
-
+                
         self._interactive = True
 
         self._msg_store=MessageStoreProxy(collection="soma")
+
+        self._gs_store=GeoSpatialStoreProxy(db="geospatial_store", collection="soma")
         
         self._server = InteractiveMarkerServer("soma")
 
@@ -222,13 +225,38 @@ class SOMAManager():
         _id = self._msg_store.insert(soma_obj)
         self._soma_obj_ids[soma_obj.id] = _id
         self._soma_obj_msg[soma_obj.id] = soma_obj
+
+        # add object to geospatial store
+        self._gs_store.insert(self.geo_json_from_soma_obj(soma_obj))
+        print "GS Store: added obj"
         
         self.load_object(str(soma_id), soma_type, soma_obj.pose)
 
+    def geo_json_from_soma_obj(self, soma_obj):
+
+        geo_json = {}
+        geo_json['soma_id'] = soma_obj.id
+        geo_json['soma_map'] = soma_obj.map
+        geo_json['soma_config'] = soma_obj.config
+        geo_json['type'] = soma_obj.type
+        geo_json['loc'] = {'type': 'Point',
+                           'coordinates': [soma_obj.pose.position.x,
+                                           soma_obj.pose.position.y]}
+        return geo_json
 
     def delete_object(self, soma_id):
-        # todo: delete from mongodb
 
+        # geospatial store
+        res = self._gs_store.find_one({'soma_id': soma_id,
+                                       'soma_map': self.soma_map,
+                                       'soma_config': self.soma_conf})
+        if res:
+            _gs_id = res['_id']
+            self._gs_store.remove(_gs_id)
+            print "GS Store: deleted obj"
+                        
+
+        # message store
         _id = self._soma_obj_ids[str(soma_id)]
         self._msg_store.delete(str(_id))
         
@@ -243,9 +271,22 @@ class SOMAManager():
 
         new_msg = copy.deepcopy(msg)
         new_msg.pose = feedback.pose
-        
-        self._msg_store.update_id(_id, new_msg)  
-        
+
+        self._msg_store.update_id(_id, new_msg)
+
+        # geospatial store
+        # delete old message
+        res = self._gs_store.find_one({'soma_id': new_msg.id,
+                                       'soma_map': self.soma_map,
+                                       'soma_config': self.soma_conf})
+        if res:
+            _gs_id = res['_id']
+            self._gs_store.remove(_gs_id)
+            print "GS Store: deleted obj"            
+
+        # add new object to geospatial store
+        self._gs_store.insert(self.geo_json_from_soma_obj(new_msg))
+        print "GS Store: added obj"
 
     def create_object_marker(self, soma_obj, soma_type, pose):
         # create an interactive marker for our server
