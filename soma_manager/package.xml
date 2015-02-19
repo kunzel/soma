@@ -52,6 +52,7 @@
   <run_depend>soma_msgs</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>soma_geospatial_store</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
