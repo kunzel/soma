@@ -11,6 +11,7 @@ import copy
 from threading import Timer
 
 from mongodb_store.message_store import MessageStoreProxy
+from soma_geospatial_store.geospatial_store import GeoSpatialStoreProxy
 from visualization_msgs.msg import Marker, InteractiveMarkerControl
 from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
@@ -84,6 +85,8 @@ class SOMAROIManager():
         self._interactive = True
 
         self._msg_store=MessageStoreProxy(collection="soma_roi")
+
+        self._gs_store=GeoSpatialStoreProxy(db="geospatial_store", collection="soma")
         
         self._server = InteractiveMarkerServer("soma_roi")
 
@@ -305,9 +308,53 @@ class SOMAROIManager():
         self._soma_obj_roi[soma_obj.id] = soma_obj.roi_id
         self._soma_obj_type[soma_obj.id] = soma_type
         self._soma_obj_pose[soma_obj.id] = pose
-        
+
         self.load_object(str(soma_id), soma_obj.roi_id, soma_type, pose)
 
+        # geospatial store
+        # delete old message
+        res = self._gs_store.find_one({'soma_roi_id': soma_roi_id,
+                                       'soma_map': self.soma_map,
+                                       'soma_config': self.soma_conf})
+        if res:
+            _gs_id = res['_id']
+            self._gs_store.remove(_gs_id)
+            #rospy.loginfo("GS Store: deleted roi")           
+
+        # add new object to geospatial store
+        geo_json = self.geo_json_from_soma_obj(soma_obj)
+        if geo_json:
+            try:
+                self._gs_store.insert(geo_json)
+                rospy.loginfo("GS Store: updated roi (%s %s)" % (soma_obj.type, soma_obj.roi_id) )
+            except:
+                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (soma_type, soma_roi_id))
+
+
+
+    def geo_json_from_soma_obj(self, soma_obj):
+
+        geo_json = {}
+        geo_json['soma_roi_id'] = soma_obj.roi_id
+        geo_json['soma_map'] = soma_obj.map
+        geo_json['soma_config'] = soma_obj.config
+        geo_json['type'] = soma_obj.type
+
+
+        if len(self._soma_obj_roi_ids[soma_obj.roi_id]) < 3:
+            rospy.logerr("GS Store: %s %s, less then 3 points => Add more points or delete ROI." % (soma_obj.type, soma_obj.roi_id) )
+            return None
+        coordinates = []    
+        for obj_id in self._soma_obj_roi_ids[soma_obj.roi_id]:
+            p = self._soma_obj_pose[obj_id]
+            coordinates.append([p.position.x, p.position.y])
+
+        p = self._soma_obj_pose[self._soma_obj_roi_ids[soma_obj.roi_id][0]]
+        coordinates.append([p.position.x, p.position.y])
+            
+        geo_json['loc'] = {'type': 'Polygon',
+                           'coordinates': [coordinates]}
+        return geo_json
 
     def delete_object(self, soma_id):
         # todo: delete from mongodb
@@ -325,6 +372,26 @@ class SOMAROIManager():
             if n != str(soma_id):
                 new_nodes.append(n)
         self._soma_obj_roi_ids[roi] = new_nodes
+
+        # geospatial store
+        # delete old message
+        old_msg = self._soma_obj_msg[soma_id]
+        res = self._gs_store.find_one({'soma_roi_id': roi,
+                                       'soma_map': self.soma_map,
+                                       'soma_config': self.soma_conf})
+        if res:
+            _gs_id = res['_id']
+            self._gs_store.remove(_gs_id)
+            #rospy.loginfo("GS Store: deleted roi")
+
+        # add new object to geospatial store
+        geo_json = self.geo_json_from_soma_obj(old_msg)
+        if geo_json:
+            try:
+                self._gs_store.insert(geo_json)
+                rospy.loginfo("GS Store: updated roi (%s %s)" % (old_msg.type, old_msg.roi_id) )
+            except:
+                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (old_msg.type, old_msg.roi_id))
     
         
     def update_object(self, feedback):
@@ -340,7 +407,24 @@ class SOMAROIManager():
         
         self._msg_store.update_id(_id, new_msg)
 
-        
+        # geospatial store
+        # delete old message
+        res = self._gs_store.find_one({'soma_roi_id': new_msg.roi_id,
+                                       'soma_map': self.soma_map,
+                                       'soma_config': self.soma_conf})
+        if res:
+            _gs_id = res['_id']
+            self._gs_store.remove(_gs_id)
+            #rospy.loginfo("GS Store: deleted roi")            
+
+        # add new object to geospatial store
+        geo_json = self.geo_json_from_soma_obj(new_msg)
+        if geo_json:
+            try:
+                self._gs_store.insert(geo_json)
+                rospy.loginfo("GS Store: updated roi (%s %s)" % (new_msg.type, new_msg.roi_id) )
+            except:
+                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (new_msg.type, new_msg.roi_id))  
 
     def create_object_marker(self, soma_obj, roi, soma_type, pose):
         # create an interactive marker for our server

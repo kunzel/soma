@@ -13,7 +13,7 @@ class GeoSpatialStoreProxy():
         self._client = pymongo.MongoClient(host,port)
         self._db = db
         self._collection = collection
-        self._client[self._db][self._collection].create_index([("loc", pymongo.GEOSPHERE)])
+        self._client[self._db][self._collection].ensure_index([("loc", pymongo.GEOSPHERE)])
         
     def insert(self, geo_json):
         return self._client[self._db][self._collection].insert(geo_json)
