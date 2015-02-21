@@ -3,7 +3,7 @@ import roslib
 roslib.load_manifest("soma_geospatial_store")
 import rospy
 import pymongo
-
+import math
 
 class GeoSpatialStoreProxy():
         
@@ -35,6 +35,12 @@ class GeoSpatialStoreProxy():
         return self._client[self._db][self._collection].find(query_json, projection)
 
 
+    def coords_to_lnglat(self, x, y):
+        earth_radius = 6371000.0 # in meters
+        lng = 90 - math.degrees(math.acos(float(x) / earth_radius))
+        lat = 90 - math.degrees(math.acos(float(y) / earth_radius))        
+        return [lng , lat]
+        
 class GeoSpatialUtils():
     
     def line_string_from_pose_array(pose_arr):

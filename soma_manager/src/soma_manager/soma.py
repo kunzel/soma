@@ -240,8 +240,8 @@ class SOMAManager():
         geo_json['soma_config'] = soma_obj.config
         geo_json['type'] = soma_obj.type
         geo_json['loc'] = {'type': 'Point',
-                           'coordinates': [soma_obj.pose.position.x,
-                                           soma_obj.pose.position.y]}
+                           'coordinates': self._gs_store.coords_to_lnglat(soma_obj.pose.position.x,
+                                                                          soma_obj.pose.position.y)}
         return geo_json
 
     def delete_object(self, soma_id):

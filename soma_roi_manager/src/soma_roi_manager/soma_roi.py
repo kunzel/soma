@@ -347,10 +347,10 @@ class SOMAROIManager():
         coordinates = []    
         for obj_id in self._soma_obj_roi_ids[soma_obj.roi_id]:
             p = self._soma_obj_pose[obj_id]
-            coordinates.append([p.position.x, p.position.y])
+            coordinates.append(self._gs_store.coords_to_lnglat(p.position.x, p.position.y))
 
         p = self._soma_obj_pose[self._soma_obj_roi_ids[soma_obj.roi_id][0]]
-        coordinates.append([p.position.x, p.position.y])
+        coordinates.append(self._gs_store.coords_to_lnglat(p.position.x, p.position.y))
             
         geo_json['loc'] = {'type': 'Polygon',
                            'coordinates': [coordinates]}

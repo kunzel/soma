@@ -136,6 +136,8 @@ def retrieve_trajectories():
 
 
 def geojson_from_trajectory(msg):
+    gs = GeoSpatialStoreProxy('geospatial_store','soma')
+    
     geojson = {}
     
     # trajectory UUID
@@ -146,7 +148,7 @@ def geojson_from_trajectory(msg):
     loc['type'] = 'LineString'
     loc['coordinates'] = []
     for ps in msg.trajectory:
-        xy_coord = [ps.pose.position.x, ps.pose.position.y]
+        xy_coord = gs.coords_to_lnglat(ps.pose.position.x, ps.pose.position.y)
         loc['coordinates'].append(xy_coord)
         geojson['loc'] = loc 
 
@@ -182,14 +184,15 @@ if __name__=="__main__":
         print k, len(v.pose), v.length, v.max_vel
         count += 1
         msg = v.to_ros_msg()
-        
-        geo_json = geojson_from_trajectory(msg)
 
-        # in case trajectory is already in there => replace
-        uuid = geo_json['uuid']
-        gs.remove(uuid)
-        gs.insert(geo_json)
-        print "GEO_JSON inserted"
+        if len(v.pose) > 500:
+            geo_json = geojson_from_trajectory(msg)
+
+            # in case trajectory is already in there => replace
+            uuid = geo_json['uuid']
+            gs.remove(uuid)
+            gs.insert(geo_json)
+            print "GEO_JSON inserted"
 
     # res = gs.find({'start_hour': { '$gt': 16, '$lt': 18}, # query
     #                'end_hour': { '$gt': 16, '$lt': 18}},
