@@ -31,8 +31,8 @@ class GeoSpatialStoreProxy():
     def find(self, query_json):
         return self._client[self._db][self._collection].find(query_json)
 
-    def find(self, query_json, projection):
-        return self._client[self._db][self._collection].find(query_json, projection)
+    #def find(self, query_json, projection):
+    #    return self._client[self._db][self._collection].find(query_json, projection)
 
 
     def coords_to_lnglat(self, x, y):
