@@ -39,11 +39,19 @@ class TrajectoryQueryService():
         
     def service_cb(self, req):
         rospy.loginfo("Request received: %s" % req)
-        json_query = json.loads(req.query)
-        trajectories = self.gs.find(json_query)
-
+        if req.visualize:
+            self.vis.clear()
+        
         res = TrajectoryQueryResponse()
         res.trajectories = Trajectories()
+        try:
+            json_query = json.loads(req.query)
+            trajectories = self.gs.find(json_query)
+        except:
+            rospy.logerr("Invalid json => re-check syntax")
+            res.error = True
+            return res
+
         count = 0
         for t in trajectories:
             if t.has_key('uuid'):
@@ -57,10 +65,10 @@ class TrajectoryQueryService():
         rospy.loginfo("Query result: %s trajectories" % count)
 
         if req.visualize:
-            self.vis.clear()
             rospy.loginfo("Visualize result on topic: %s" % self.topic)
             self.vis.visualize_trajectories(res.trajectories)
         rospy.loginfo("Response returned")
+        res.error = False
         return res
 
     def main(self):

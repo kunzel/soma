@@ -1,4 +1,5 @@
 string query
 bool visualize
 ---
+bool error 
 human_trajectory/Trajectories trajectories
