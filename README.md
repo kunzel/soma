@@ -97,8 +97,8 @@ SOMA trajectory importer
 where `map` denotes the name of the 2D map and `config` denotes an object configuration within this map.
  
 
-SOMA trajectory query service:
-------------------------------
+SOMA trajectory query service
+-----------------------------
 
 1. The service can be started as follows:
 
