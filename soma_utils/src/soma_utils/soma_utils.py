@@ -176,7 +176,7 @@ class SOMAUtils():
             point.x = obj.pose.position.x
             point.y = obj.pose.position.y
             if self._inside(point,polygon):
-                obj_ids.append(obj.id)
+                obj_ids.append("" + obj.id + "-" +  obj.type + "")
 
         return obj_ids
 
@@ -237,9 +237,9 @@ class SOMAUtils():
         table = []
 
         for k, v in self._soma_roi.iteritems():
-            table.append([ k , self._soma_roi[str(k)][0].type , self.area(k), str(self.center(k)), str(self.objects(k))])
+            table.append([ k , self._soma_roi[str(k)][0].type , self.area(k), str(self.objects(k))])
 
-        print tabulate(table, headers=['ID', 'Type', 'Area (m^2)', 'Center', 'Object IDs'],tablefmt='rst')
+        print tabulate(table, headers=['ID', 'Type', 'Area (m^2)', 'Object IDs'],tablefmt='rst')
         print "Total %i" %  len(self._soma_roi)
 
 
