@@ -1,20 +1,27 @@
 soma
 ====
 
-A toolbox for managing Semantic Object Maps (SOMA). Currently there are two modeling tools: 
+A toolbox for creating, maintaining, and querying Semantic Object Maps (SOMAs). SOMAs can include objects, regions of interest (ROI), and trajectories. 
+
+Currently there are two modeling tools: 
 
 - the SOMA object manager 
 - the SOMA ROI manager (ROI = regions of interest)
  
-The SOMA manager for objects visualizes objects in RVIZ where the user can add, delete, move, and rotate them interactively. The SOMA manager for ROIs visualizes regions in RVIZ where the user can add, delete, and modify them. Both the object and the ROI configurations are immediately stored and updated in the ROS datacentre (MongoDB).  
+The SOMA manager for objects visualizes objects in RVIZ where the user can add, delete, move, and rotate them interactively. The SOMA manager for ROIs visualizes regions in RVIZ where the user can add, delete, and modify them. Both the object and the ROI configurations are immediately stored and updated in the ROS datacentre (MongoDB).
+
+Trajectories can be added to a SOMA using an import tool. These trajectories are generated from the output of the bayes_people_tracker in (strands_perception_people).  
+
+A query service (ROS Service) allows a caller to extract a set of trajectories based on spatial-temporal restritions. For example, a query can filter out trajectories that are near an object, within a region, or intersect with another object (region, trajectory). Additionally, temporal constraints can be specified to select only trajectories that were observed during a certain interval.   
 
 
 Prerequisites
 -------------
 
-- MongoDB
+- MongoDB (>=2.4)
 - mongodb_store
-- ROS's navigation stack 
+- ROS's navigation stack (only map server)
+- strands_perception_people
 
 
 Getting started (general steps)
@@ -78,3 +85,25 @@ where `map` denotes the name of the 2D map (Step 3) and `config` denotes an obje
 
 
 ![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_roi.png)
+
+SOMA trajectory importer
+------------------------
+
+1. Trajectories can be impoerted as follows:
+
+    ```
+    $ rosrun soma_trajectory trajectory_importer.py <map> <config>
+    ```
+where `map` denotes the name of the 2D map and `config` denotes an object configuration within this map.
+ 
+
+SOMA trajectory query service:
+------------------------------
+
+1. The service can be started as follows:
+    ```
+    $ rosrun soma_trajectory trajectory_query_service.py
+    ```
+The service request includes a MongoDB query in json format and a boolean flag whether the result should be visualized. The response has a boolean error flag (in case the JSON was invalid) and list of trajectories that match the query specification.
+
+
