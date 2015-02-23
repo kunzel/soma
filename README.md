@@ -109,15 +109,16 @@ The service request includes a MongoDB query in json format and a boolean flag w
 
 Here is an example query:
 
-    ```{"loc": {"$nearSphere": { "$geometry":  
+    {"loc": {"$nearSphere": { "$geometry":  
                                               { "type" : "Point", 
                                                 "coordinates" : 
                                                   [ -0.0002281133006505343, -4.632269674686995e-05 ] 
                                               }, 
                                  "$maxDistance": 1
-                                }
-                }
-        }```
+                            }
+            }
+    }
+   
 
  Further examples are here: https://github.com/kunzel/soma/blob/master/soma_trajectory/scripts/query_examples.py
 
