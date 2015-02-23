@@ -101,6 +101,7 @@ SOMA trajectory query service:
 ------------------------------
 
 1. The service can be started as follows:
+
     ```
     $ rosrun soma_trajectory trajectory_query_service.py
     ```
