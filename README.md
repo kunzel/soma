@@ -107,6 +107,20 @@ SOMA trajectory query service:
     ```
 The service request includes a MongoDB query in json format and a boolean flag whether the result should be visualized (see image below). The response has a boolean error flag (in case the JSON was invalid) and list of trajectories that match the query specification. 
 
+Here is an example query:
+
+    ```{"loc": {"$nearSphere": { "$geometry":  
+                                              { "type" : "Point", 
+                                                "coordinates" : 
+                                                  [ -0.0002281133006505343, -4.632269674686995e-05 ] 
+                                              }, 
+                                 "$maxDistance": 1
+                                }
+                }
+        }```
+
+ Further examples are here: https://github.com/kunzel/soma/blob/master/soma_trajectory/scripts/query_examples.py
+
 ![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_query.png)
 
 
