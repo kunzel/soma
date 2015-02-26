@@ -2,7 +2,7 @@
   "roi": {
 	        "Office" : "",  
           "Meeting room" : "",        
-          "Resource room" : "",                    
+          "Resource room" : "", 
           "Kitchen" : "",              
           "Library" : "",      
           "Common room" : "",
@@ -10,6 +10,12 @@
           "Eating area" : "",
           "Atrium" : "",
           "Reception" : "",      
-          "Hallway" : ""                        
+          "Hallway" : "", 
+          "Administration Room" : "", 
+          "School Service" : "", 
+          "IT Service" : "", 
+          "Downstairs" : "", 
+          "Upstairs" : "", 
+          "Lift" : "" 
   }
 }
