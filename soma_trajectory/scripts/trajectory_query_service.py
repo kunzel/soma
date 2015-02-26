@@ -32,7 +32,8 @@ class TrajectoryQueryService():
             return None
         elif len(res) > 1:
             rospy.logerr("Multiple trajectories found: %s" % uuid)
-            return None
+            t = res[0][0]
+            return t
 
         t = res[0][0]
         return t
