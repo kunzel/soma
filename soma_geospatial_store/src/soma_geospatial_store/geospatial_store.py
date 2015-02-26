@@ -17,9 +17,9 @@ class GeoSpatialStoreProxy():
         # create indexes
         self._client[self._db][self._collection].ensure_index([("loc", pymongo.GEOSPHERE)])
 
-        self._client[self._db][self._collection].ensure_index([("uuid", 1)], 
-                                                              unique= True,
-                                                              sparse=True)
+        # self._client[self._db][self._collection].ensure_index([("uuid", 1)], 
+        #                                                       unique= True,
+        #                                                       sparse=True)
 
         # self._client[self._db][self._collection].ensure_index([("soma_id", 1),("soma_map",1),("soma_config",1)],
         #                                                       unique=True,
@@ -46,8 +46,8 @@ class GeoSpatialStoreProxy():
     def find(self, query_json):
         return self._client[self._db][self._collection].find(query_json)
 
-    #def find(self, query_json, projection):
-    #    return self._client[self._db][self._collection].find(query_json, projection)
+    def find_projection(self, query_json, projection):
+        return self._client[self._db][self._collection].find(query_json, projection)
 
 
     def coords_to_lnglat(self, x, y):
@@ -56,13 +56,74 @@ class GeoSpatialStoreProxy():
         lat = 90 - math.degrees(math.acos(float(y) / earth_radius))        
         return [lng , lat]
         
-class GeoSpatialUtils():
-    
-    def line_string_from_pose_array(pose_arr):
-        pass
+    # helper functions
+    def obj_ids(self, soma_map, soma_config):
+        query =  {   "soma_id": {"$exists": "true"},
+                     "soma_map":  soma_map ,
+                    "soma_config": soma_config
+        }
+        res = self.find_projection(query, {"soma_id": 1})
+        ret = []
+        for ent in res:
+            ret.append(ent["soma_id"])
+        return ret
 
-    def polygon_from_pose_array(pose_arr):
-        pass
+    def roi_ids(self, soma_map, soma_config):
+        query =  {  "soma_roi_id": {"$exists": "true"},
+                    "soma_map":  soma_map ,
+                    "soma_config": soma_config
+                }
+        res = self.find_projection(query, {"soma_roi_id": 1})
+        ret = []
+        for ent in res:
+            ret.append(ent["soma_roi_id"])
+        return ret
 
-    def point_from_pose(pose):
-        pass
+    def type_of_obj(self, soma_id, soma_map, soma_config):
+        query =  { "soma_id": soma_id,
+                   "soma_map":  soma_map ,
+                   "soma_config": soma_config
+        }
+        res = self.find_projection(query, {"type": 1})
+        if res.count() == 0:
+            return None
+        return res[0]['type']
+
+    def type_of_roi(self, soma_roi_id, soma_map, soma_config):
+        query =  { "soma_roi_id": soma_roi_id,
+                   "soma_map":  soma_map ,
+                   "soma_config": soma_config
+        }
+        res = self.find_projection(query, {"type": 1})
+        if res.count() == 0:
+            return None
+        return res[0]['type']
+
+        
+    def geom_of_obj(self, soma_id, soma_map, soma_config):
+        query =  { "soma_id": soma_id,
+                   "soma_map":  soma_map ,
+                   "soma_config": soma_config
+        }
+        res = self.find_projection(query, {"loc": 1})
+        if res.count() == 0:
+            return None
+        return res[0]['loc']
+
+        
+    def geom_of_roi(self, roi_id, soma_map, soma_config):
+        query =  { "soma_roi_id": roi_id,
+                   "soma_map":  soma_map ,
+                   "soma_config": soma_config
+        }
+        res = self.find_projection(query, {"loc": 1})
+        if res.count() == 0:
+            return None
+        return res[0]['loc']
+        
+    def geom_of_trajectory(self, uuid):
+        query =  { "uuid": uuid}
+        res = self.find_projection(query, {"loc": 1})
+        if res.count() == 0:
+            return None
+        return res[0]['loc']
