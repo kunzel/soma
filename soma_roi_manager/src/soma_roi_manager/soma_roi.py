@@ -120,7 +120,7 @@ class SOMAROIManager():
         add_entry = self.menu_handler.insert( "Add ROI" )
 
         self.menu_item = dict()
-        for i, k in enumerate(self.mesh):
+        for k in sorted(self.mesh.keys()):
             entry =  self.menu_handler.insert(k, parent=add_entry, callback=self._add_cb)
             self.menu_item[entry] = k
             
