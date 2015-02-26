@@ -13,8 +13,23 @@ class GeoSpatialStoreProxy():
         self._client = pymongo.MongoClient(host,port)
         self._db = db
         self._collection = collection
+
+        # create indexes
         self._client[self._db][self._collection].ensure_index([("loc", pymongo.GEOSPHERE)])
-        
+
+        self._client[self._db][self._collection].ensure_index([("uuid", 1)], 
+                                                              unique= True,
+                                                              sparse=True)
+
+        # self._client[self._db][self._collection].ensure_index([("soma_id", 1),("soma_map",1),("soma_config",1)],
+        #                                                       unique=True,
+        #                                                       sparse=True)
+
+        # self._client[self._db][self._collection].ensure_index([("soma_roi_id",1),("soma_map",1),("soma_config",1)], 
+        #                                                       unique= True,
+        #                                                       sparse=True)
+
+                
     def insert(self, geo_json):
         return self._client[self._db][self._collection].insert(geo_json)
 
