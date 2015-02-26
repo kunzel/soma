@@ -92,9 +92,7 @@ SOMA trajectory importer
 1. Trajectories can be impoerted as follows:
 
     ```
-    $ rosrun soma_trajectory trajectory_importer.py <map> <config>
-    ```
-where `map` denotes the name of the 2D map and `config` denotes an object configuration within this map.
+    $ rosrun soma_trajectory trajectory_importer.py
  
 
 SOMA trajectory query service
