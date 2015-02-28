@@ -93,6 +93,7 @@ SOMA trajectory importer
 
     ```
     $ rosrun soma_trajectory trajectory_importer.py
+    ```
  
 
 SOMA trajectory query service
@@ -103,6 +104,7 @@ SOMA trajectory query service
     ```
     $ rosrun soma_trajectory trajectory_query_service.py
     ```
+    
 The service request includes a MongoDB query in json format and a boolean flag whether the result should be visualized (see image below). The response has a boolean error flag (in case the JSON was invalid) and list of trajectories that match the query specification. 
 
 Here is an example query:
