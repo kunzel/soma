@@ -12,7 +12,7 @@ from soma_geospatial_store.geospatial_store import GeoSpatialStoreProxy
 from mongodb_store.message_store import MessageStoreProxy
 
 from soma_trajectory.srv import TrajectoryQuery, TrajectoryQueryResponse
-from soma_trajectory.visualizer import TrajectoryVisualizer
+from visualizer import TrajectoryVisualizer
 
 class TrajectoryQueryService():
 

@@ -34,11 +34,13 @@ Getting started (general steps)
 2. Launch the ROS datacentre:
 
     ```
-    $ roslaunch mongodb_store datacentre.launch
+    $ roslaunch mongodb_store mongodb_store.launch db_path:=/home/strands/mongodb_store/bham_trajectory_store/
     ```
 3. Run the map_server with a 2D map:
   ```
   $ rosrun map_server map_server <map.yaml>
+  $ /home/strands/STRANDS/maps/maps/library/map.yaml 
+
   ```
 where `map.yaml` specifies the map you want to load.
     
@@ -49,6 +51,28 @@ where `map.yaml` specifies the map you want to load.
   $ rosrun rviz rviz
   ```
 
+Import into Mongodb (commands):
+-------------------------------
+
+
+SOMA MESSAGES
+
+    ```
+    $ mongoimport -d message_store -c soma --port 62345 --file soma_message_store.json
+    ```
+ROI MESSAGES
+
+    ```
+    $ mongoimport -d message_store -c soma_roi --port 62345 --file soma_roi.json 
+    ```
+    
+GEOSPATIAL MESSAGES
+
+    ```
+    $ mongoimport -d geospatial_store -c soma --port 62345 --file soma_geospatial_store.json 
+    ```
+
+
 SOMA object manager
 -------------------
 
@@ -56,6 +80,8 @@ SOMA object manager
 
     ```
     $ rosrun soma_manager soma.py <map> <config>
+    
+    $ rosrun soma_manager soma.py uob_library uob_lib_conf
     ```
 where `map` denotes the name of the 2D map (Step 3) and `config` denotes an object configuration within this map. By default, the configuration file `soma_objects/config/default.json` is used to initialize the list of available object types. Alternatively, the following command can be used to use a different configuration file:
 
@@ -74,6 +100,7 @@ SOMA ROI manager
 
     ```
     $ rosrun soma_roi_manager soma_roi.py <map> <config>
+    $ rosrun soma_roi_manager soma_roi.py uob_library uob_lib_conf
     ```
 where `map` denotes the name of the 2D map (Step 3) and `config` denotes an object configuration within this map. By default, the configuration file `soma_roi_manager/config/default.json` is used to initialize the list of available ROI types. Alternatively, the following command can be used to use a different configuration file:
 
@@ -93,7 +120,8 @@ SOMA trajectory importer
 
     ```
     $ rosrun soma_trajectory trajectory_importer.py
- 
+    ```
+
 
 SOMA trajectory query service
 -----------------------------

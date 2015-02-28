@@ -37,7 +37,7 @@ if __name__=="__main__":
     # rospy.loginfo("Result: %s trajectories" % len(res.trajectories.trajectories))
 
     #raw_input("Press enter to continue")
-    
+    """
     # Malformed queries lead to an error => always check error flag in result!
     query = '{'
     rospy.loginfo("Query: %s" % query)
@@ -58,6 +58,7 @@ if __name__=="__main__":
     # "end_minute" : 49,
     # "start_weekday" : 0,
     # "end_weekday" : 0
+    
     
     # Get all trajectories that start between 14-15 o'clock 
     query = '{"start_hour": {"$gt": 13, "$lt": 15}}'
@@ -82,9 +83,10 @@ if __name__=="__main__":
     rospy.loginfo("Result: %s trajectories" % len(res.trajectories.trajectories))
 
     raw_input("Press enter to continue")
-    
-    # # GEO SPATIAL QUERIES
+    """
 
+    # # GEO SPATIAL QUERIES
+    """
     # near object [geometry is a point, maxDistance in meters]
     query = '{"loc": {"$nearSphere": { "$geometry":  { "type" : "Point", "coordinates" : [ -0.0002281133006505343, -4.632269674686995e-05 ] }, "$maxDistance": 1}}}'
     rospy.loginfo("Query: %s" % query )
@@ -92,7 +94,7 @@ if __name__=="__main__":
     rospy.loginfo("Result: %s trajectories" % len(res.trajectories.trajectories))
 
     raw_input("Press enter to continue")
-
+    """
     # within region of interest (ROI) [geometry is a polygon]
     query ='''{"loc": { "$geoWithin": { "$geometry":
     {
@@ -125,6 +127,10 @@ if __name__=="__main__":
     rospy.loginfo("Query: %s" % query )
     res = client.query(query, True)
     rospy.loginfo("Result: %s trajectories" % len(res.trajectories.trajectories))
+    rospy.loginfo("Type of first trajectory is: %s" % type(res.trajectories.trajectories[0]))
+    rospy.loginfo("Trajectory.trajectory[0]: %s" % (res.trajectories.trajectories[0].trajectory[0]))
+
+
 
     raw_input("Press enter to continue")
 
