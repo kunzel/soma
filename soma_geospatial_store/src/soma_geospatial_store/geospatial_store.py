@@ -127,3 +127,20 @@ class GeoSpatialStoreProxy():
         if res.count() == 0:
             return None
         return res[0]['loc']
+
+
+    def objs_within_roi(self, roi, soma_map, soma_config):
+        """Returns all the objects within a region of interest"""
+
+        query = {  "soma_map":  soma_map ,
+                   "soma_config": soma_config,
+                   "soma_id": {"$exists": "true"},
+                   "loc": {"$geoIntersects": {"$geometry": roi}} 
+                }
+
+        res = self.find(query)
+        if res.count() == 0:
+            return None
+        return res
+     
+
