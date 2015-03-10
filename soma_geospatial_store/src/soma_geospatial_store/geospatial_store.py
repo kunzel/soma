@@ -142,5 +142,20 @@ class GeoSpatialStoreProxy():
         if res.count() == 0:
             return None
         return res
-     
+
+
+    def obj_coords(self, soma_id, soma_map, soma_config):
+        """Returns the map coordinates of a soma_id object"""
+        query = {  "map":  soma_map ,
+                   "config": soma_config,
+                   "id": soma_id
+                } 
+
+        res = self.find_projection(query, {"pose": 1})
+
+        if res.count() == 0:
+            return None
+
+        return res[0]['pose']['position']['x'], res[0]['pose']['position']['y'], \
+            res[0]['pose']['position']['z']
 
