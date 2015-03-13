@@ -5,6 +5,39 @@ import rospy
 import pymongo
 import math
 
+
+
+class TwoProxies(object):
+    """Allows you to use spatial queries on geo_store, and returns message_store document."""
+    def __init__(self, geo_store, message_store, map, config):
+        self.gs = geo_store
+        self.msg = message_store
+        self.map = map
+        self.config = config
+
+
+    def object_xyz(self, res):
+        objects={}
+        for i in res:
+            key = i['type'] +'_'+ i['soma_id']
+            objects[key] = self.msg.obj_coords(i['soma_id'], self.map, self.config)
+        return objects
+
+
+    def trajectory_roi(self, uuid): 
+        return self.gs.trajectory_roi(uuid, self.map, self.config)
+
+
+    def roi_objects(self, roi):
+        geom = self.gs.geom_of_roi(str(roi), self.map, self.config)  #roi geometry
+        res = self.gs.objs_within_roi(geom, self.map, self.config)   #objs in roi
+        if res.count() == 0:
+            return None
+        return self.object_xyz(res)
+
+
+
+
 class GeoSpatialStoreProxy():
         
     def __init__(self, db, collection):
@@ -67,6 +100,23 @@ class GeoSpatialStoreProxy():
         for ent in res:
             ret.append(ent["soma_id"])
         return ret
+
+
+    def trajectory_roi(self, uuid, soma_map, soma_config): 
+        """Returns region of the trajectory"""
+        geom = self.geom_of_trajectory(uuid)    #trajectory geometry
+        query = {"soma_map":  soma_map,
+                 "soma_config": soma_config,
+                 "soma_roi_id": {"$exists": "true"},
+                 "loc": {"$geoIntersects": {
+                         "$geometry": {
+                             "type" : "LineString", 
+                             "coordinates" : geom['coordinates']}}}
+                }
+        
+        res = self.find_projection(query, {"soma_roi_id": 1})     #trajectory roi
+        return res[0]['soma_roi_id']      
+
 
     def roi_ids(self, soma_map, soma_config):
         query =  {  "soma_roi_id": {"$exists": "true"},
@@ -143,6 +193,20 @@ class GeoSpatialStoreProxy():
             return None
         return res
 
+    def trajectories_within_roi(self, roi, soma_map, soma_config):
+        """Returns all the trajectories within a region of interest"""
+
+        query = {  "soma_map":  soma_map ,
+                   "soma_config": soma_config,
+                   "soma_id": {"$exists": "true"},
+                   "loc": {"$geoIntersects": {"$geometry": roi}} 
+                }
+
+        res = self.find(query)
+        if res.count() == 0:
+            return None
+        return res
+
 
     def obj_coords(self, soma_id, soma_map, soma_config):
         """Returns the map coordinates of a soma_id object"""
@@ -155,7 +219,6 @@ class GeoSpatialStoreProxy():
 
         if res.count() == 0:
             return None
-
         return res[0]['pose']['position']['x'], res[0]['pose']['position']['y'], \
             res[0]['pose']['position']['z']
 
