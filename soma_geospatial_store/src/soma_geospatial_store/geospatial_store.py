@@ -5,8 +5,6 @@ import rospy
 import pymongo
 import math
 
-
-
 class TwoProxies(object):
     """Allows you to use spatial queries on geo_store, and returns message_store document."""
     def __init__(self, geo_store, message_store, map, config):
@@ -210,7 +208,7 @@ class GeoSpatialStoreProxy():
 
     def obj_coords(self, soma_id, soma_map, soma_config):
         """Returns the map coordinates of a soma_id object"""
-        query = {  "map":  soma_map ,
+        query = {  "map":  soma_map,
                    "config": soma_config,
                    "id": soma_id
                 } 
@@ -221,4 +219,18 @@ class GeoSpatialStoreProxy():
             return None
         return res[0]['pose']['position']['x'], res[0]['pose']['position']['y'], \
             res[0]['pose']['position']['z']
+
+
+    def observed_roi(self, view_tri, soma_map, soma_config):
+        """Returns list of regions the robot can see"""
+        query = {  "soma_map":  soma_map ,
+                   "soma_config": soma_config,
+                   "soma_roi_id": {"$exists": "true"},
+                   "loc": {"$geoIntersects": {
+                         "$geometry": { 
+                             "type" : "Polygon", 
+                             "coordinates" : [view_tri]}}}
+                } 
+        res = self.find_projection(query, {"soma_roi_id" : 1})
+        return res
 
