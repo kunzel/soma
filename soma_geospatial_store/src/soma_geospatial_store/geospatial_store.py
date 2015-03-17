@@ -29,7 +29,7 @@ class TwoProxies(object):
     def roi_objects(self, roi):
         geom = self.gs.geom_of_roi(str(roi), self.map, self.config)  #roi geometry
         res = self.gs.objs_within_roi(geom, self.map, self.config)   #objs in roi
-        if res.count() == 0:
+        if res == None:
             return None
         return self.object_xyz(res)
 
