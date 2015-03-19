@@ -13,7 +13,6 @@ class TwoProxies(object):
         self.map = map
         self.config = config
 
-
     def object_xyz(self, res):
         objects={}
         for i in res:
@@ -22,8 +21,8 @@ class TwoProxies(object):
         return objects
 
 
-    def trajectory_roi(self, uuid): 
-        return self.gs.trajectory_roi(uuid, self.map, self.config)
+    def trajectory_roi(self, uuid, poses): 
+        return self.gs.trajectory_roi(uuid, poses, self.map, self.config)
 
 
     def roi_objects(self, roi):
@@ -106,16 +105,19 @@ class GeoSpatialStoreProxy():
         return ret
 
 
-    def trajectory_roi(self, uuid, soma_map, soma_config): 
+    def trajectory_roi(self, uuid, poses, soma_map, soma_config): 
         """Returns region of the trajectory"""
-        geom = self.geom_of_trajectory(uuid)    #trajectory geometry
+        geom = []
+        for p in poses:
+            geom.append(self.coords_to_lnglat(p[0], p[1]))
+
         query = {"soma_map":  soma_map,
                  "soma_config": soma_config,
                  "soma_roi_id": {"$exists": "true"},
                  "loc": {"$geoIntersects": {
                          "$geometry": {
                              "type" : "LineString", 
-                             "coordinates" : geom['coordinates']}}}
+                             "coordinates" : geom}}}
                 }
         
         res = self.find_projection(query, {"soma_roi_id": 1})
