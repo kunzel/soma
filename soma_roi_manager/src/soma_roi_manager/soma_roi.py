@@ -17,6 +17,7 @@ from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
+from geometry_msgs.msg import Polygon
 
 from soma_msgs.msg import SOMAROIObject
 from bson.objectid import ObjectId
@@ -60,6 +61,33 @@ def b_func(x):
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
+class SOMAROIQuery():
+
+    def __init__(self, soma_map, soma_conf):
+        self.soma_map = soma_map
+        self.soma_conf = soma_conf
+        self._msg_store=MessageStoreProxy(collection="soma_roi")
+
+    def get_polygon(self, roi_id):
+        objs = self._msg_store.query(SOMAROIObject._type, message_query={"map": self.soma_map,
+                                                                         "config": self.soma_conf,
+                                                                         "roi_id": roi_id})
+        ids = []
+        poses = []
+        for o,om in objs:
+            ids.append(o.id)
+            poses.append(o.pose)
+
+        sorted_poses = [_pose for (_id,_pose) in sorted(zip(ids, poses))]
+        poly = Polygon()
+        poly.points = []
+        for p in sorted_poses:
+            point = Point()
+            point.x = p.position.x 
+            point.y = p.position.y 
+            poly.points.append(point)
+        return poly
+            
 
 class SOMAROIManager():
 
