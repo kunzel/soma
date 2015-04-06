@@ -1,0 +1,10 @@
+
+{ 
+  "roi": {
+	  "Kitchen" : "",  
+    "Office" : "",
+    "Hallway" : "",
+    "OpenPlan" : "",
+    "MeetingRoom" : ""
+  }
+}
