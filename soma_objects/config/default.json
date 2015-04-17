@@ -29,5 +29,6 @@
 "Keyboard" : "package://soma_objects/meshes/keyboard.dae",
 "Microwave" : "package://soma_objects/meshes/microwave.dae",
 "Printer" : "package://soma_objects/meshes/printer.dae",
-"Laptop3" : "package://soma_objects/meshes/laptop3.dae"}
+"Laptop3" : "package://soma_objects/meshes/laptop3.dae",
+"DockingStation": "package://soma_objects/meshes/docking_station.dae"}
 }
