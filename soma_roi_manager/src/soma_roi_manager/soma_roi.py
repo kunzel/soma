@@ -87,6 +87,26 @@ class SOMAROIQuery():
             point.y = p.position.y 
             poly.points.append(point)
         return poly
+
+    def get_rois(self, roi_type=None):
+        """
+        Returns a set of roi IDs of the given type. If type not specified,
+        returns all rois in this map/configuration.
+        """
+        if roi_type is not None:
+            objs = self._msg_store.query(SOMAROIObject._type,
+                                         message_query={"map": self.soma_map,
+                                                        "config": self.soma_conf,
+                                                        "type": roi_type})
+        else:
+            objs = self._msg_store.query(SOMAROIObject._type,
+                                         message_query={"map": self.soma_map,
+                                                        "config": self.soma_conf} )
+        #TODO: here it would be nice to be able to use mongodb distinct function
+        rois=set()
+        for o in objs:
+            rois.add(o[0].roi_id)
+        return rois
             
 
 class SOMAROIManager():
