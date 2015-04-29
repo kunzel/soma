@@ -8,7 +8,7 @@ import json
 from human_trajectory.msg import Trajectory
 from human_trajectory.msg import Trajectories
 
-from soma_geospatial_store.geospatial_store import GeoSpatialStoreProxy 
+from soma_geospatial_store.geospatial_store import GeoSpatialStoreProxy
 from mongodb_store.message_store import MessageStoreProxy
 
 from soma_trajectory.srv import TrajectoryQuery, TrajectoryQueryResponse
@@ -18,13 +18,13 @@ class TrajectoryQueryService():
 
     def __init__(self):
         self.gs = GeoSpatialStoreProxy('geospatial_store','soma')
-        self.ms = MessageStoreProxy(collection="people_trajectories")
+        self.ms = MessageStoreProxy(collection="people_trajectory")
 
         # setting up the service
         self.ser = rospy.Service('/trajectory_query', TrajectoryQuery, self.service_cb)
         self.topic = 'trajectory_query'
         self.vis = TrajectoryVisualizer(self.topic)
-        
+
     def retrieve_msg(self, uuid):
         res = self.ms.query(Trajectory._type, message_query={"uuid": uuid})
         if len(res) < 1:
@@ -37,12 +37,12 @@ class TrajectoryQueryService():
 
         t = res[0][0]
         return t
-        
+
     def service_cb(self, req):
         rospy.loginfo("Request received: %s" % req)
         if req.visualize:
             self.vis.clear()
-        
+
         res = TrajectoryQueryResponse()
         res.trajectories = Trajectories()
         try:
@@ -76,9 +76,7 @@ class TrajectoryQueryService():
         rospy.spin()
 
 if __name__=="__main__":
-    rospy.init_node("trajectory_query_service")    
+    rospy.init_node("trajectory_query_service")
     rospy.loginfo("Running trajectory_query_service")
     tqs = TrajectoryQueryService()
     tqs.main()
-      
-
