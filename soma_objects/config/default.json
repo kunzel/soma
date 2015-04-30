@@ -23,7 +23,11 @@
 "Bar (table)" : "package://soma_objects/meshes/bar_table.dae",
 "Bar (stool)" : "package://soma_objects/meshes/bar_stool.dae",
 "Cabinet (filing)" : "package://soma_objects/meshes/cabinet_filing.dae",
-"Chair (library)" : "package://soma_objects/meshes/chair_library.dae"},
+"Chair (library)" : "package://soma_objects/meshes/chair_library.dae",
+"closedShelf_g4s" : "package://soma_objects/meshes/g4s/closedShelf.dae",
+"openShelf_g4s" : "package://soma_objects/meshes/g4s/openShelf.dae",
+"desk_left_g4s" : "package://soma_objects/meshes/g4s/desk_left.dae",
+"desk_right_g4s" : "package://soma_objects/meshes/g4s/desk_right.dae"},
 "3D": {
 "Monitor" : "package://soma_objects/meshes/monitor.dae",
 "Keyboard" : "package://soma_objects/meshes/keyboard.dae",
