@@ -219,7 +219,7 @@ class SOMAManager():
         soma_obj.type = soma_type
         soma_obj.pose = pose
         soma_obj.pose.position.z = 0.0
-        soma_obj.frame = '/map'
+        soma_obj.frame = 'map'
         soma_obj.mesh = self.mesh[soma_type]
 
         _id = self._msg_store.insert(soma_obj)
@@ -291,7 +291,7 @@ class SOMAManager():
     def create_object_marker(self, soma_obj, soma_type, pose):
         # create an interactive marker for our server
         int_marker = InteractiveMarker()
-        int_marker.header.frame_id = "/map"
+        int_marker.header.frame_id = "map"
         int_marker.name = soma_obj
         int_marker.description = "id" + soma_obj
         int_marker.pose = pose
