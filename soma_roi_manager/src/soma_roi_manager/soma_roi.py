@@ -481,6 +481,7 @@ class SOMAROIManager():
         int_marker.name = soma_obj
         int_marker.description = soma_type + ' (' + roi +  ')'
         int_marker.pose = pose
+        int_marker.pose.position.z = 0.01
         
         marker = Marker()
         marker.type = Marker.SPHERE

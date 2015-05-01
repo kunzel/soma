@@ -295,6 +295,7 @@ class SOMAManager():
         int_marker.name = soma_obj
         int_marker.description = "id" + soma_obj
         int_marker.pose = pose
+        int_marker.pose.position.z = 0.01 
         
         mesh_marker = Marker()
         mesh_marker.type = Marker.MESH_RESOURCE
