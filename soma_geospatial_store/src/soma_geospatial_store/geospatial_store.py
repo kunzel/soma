@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import roslib
-roslib.load_manifest("soma_geospatial_store")
+
 import rospy
 import pymongo
 import math
@@ -190,6 +189,33 @@ class GeoSpatialStoreProxy():
         return res[0]['loc']
 
 
+    def rois_containing_obj(self, obj_id, soma_map, soma_config):
+        """ Returns all the rois that contain this object."""
+            
+        # first find the object
+        query = {  "soma_map":  soma_map ,
+                   "soma_config": soma_config,
+                   "soma_id": obj_id,        
+        }
+        obj = self.find_one(query)
+        
+        if obj is None:
+            print 'No object found with id %s' % obj_id
+            return None 
+
+        query = { "soma_map":  soma_map ,
+                    "soma_config": soma_config,
+                    "soma_roi_id": {"$exists": "true"},                    
+                    "loc": {"$geoIntersects": {"$geometry": obj['loc']}} 
+        }
+
+        res = self.find_projection(query, {"soma_roi_id": 1})
+        ret = []
+        for ent in res:
+            ret.append(ent["soma_roi_id"])
+        return ret
+
+
     def objs_within_roi(self, roi, soma_map, soma_config):
         """Returns all the objects within a region of interest"""
 
@@ -203,6 +229,9 @@ class GeoSpatialStoreProxy():
         if res.count() == 0:
             return None
         return res
+
+
+
 
     def trajectories_within_roi(self, roi, soma_map, soma_config):
         """Returns all the trajectories within a region of interest"""
