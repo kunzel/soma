@@ -7,6 +7,7 @@ import json
 import argparse
 import random
 import copy
+import sys
 
 from threading import Timer
 
@@ -577,7 +578,7 @@ if __name__=="__main__":
     parser.add_argument("conf", nargs=1, help='Name of the object configuration')
     parser.add_argument('-t', metavar='config-file')
                         
-    args = parser.parse_args()
+    args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
     
     rospy.init_node("soma")
     rospy.loginfo("Running SOMA (map: %s, conf: %s, types: %s)", args.map[0], args.conf[0], args.t)
