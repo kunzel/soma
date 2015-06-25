@@ -1,0 +1,44 @@
+{
+  "cup1" : 
+  {
+    "type" :      "Cup",
+    "probability": 0.8, 
+    "cost": 120.0, 
+    "labels" : {
+      "wall" : 2, 
+      "chair/sofa": 2, 
+      "prop": 2,
+      "table": 2,
+      "floor": 2,
+      "door": 2
+    }
+  },
+  "mug1" : 
+  {
+    "type" :      "Cup",
+    "probability": 0.8,
+    "cost": 120.0, 
+    "labels" : {
+      "wall" : 2, 
+      "chair/sofa": 1, 
+      "prop": 1,
+      "table": 1,
+      "floor": 1,
+      "door": 1
+    }
+  },
+  "book1" : 
+  {
+    "type" :      "Book",
+    "probability": 0.8, 
+    "cost": 120.0, 
+    "labels" : {
+      "wall" : 4, 
+      "chair/sofa": 1, 
+      "prop": 1,
+      "table": 1,
+      "floor": 1,
+      "door": 1
+    }
+  }
+}

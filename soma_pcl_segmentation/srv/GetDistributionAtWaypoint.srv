@@ -1,0 +1,5 @@
+string waypoint  # search at this waypoint
+---
+uint16[] keys # keys of the octomap 
+string[] labels # semantic labels
+float32[] probability # probability for each label at each voxel/key
