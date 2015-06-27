@@ -1,0 +1,7 @@
+sensor_msgs/PointCloud2 pcl
+string[] labels
+float32[] probabilities
+octomap_msgs/Octomap octomap
+---
+uint16[] keys
+string[] labels
