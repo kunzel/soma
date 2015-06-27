@@ -8,12 +8,20 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   semantic_map_publisher
   semantic_segmentation
-  semantic_map_publisher
+  roscpp
+  std_msgs
+  sensor_msgs
+  pcl_ros
+  octomap_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+find_package(PCL 1.7 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -55,7 +63,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   GetProbabilityAtWaypoint.srv
-  GetDistributionAtWaypoint.srv
+  GetProbabilityAtView.srv
+  GetPCLOctomapMapping.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -69,6 +78,8 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
+  sensor_msgs
+  octomap_msgs
 )
 
 ###################################
@@ -83,7 +94,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES soma_pcl_segmentation
-#  CATKIN_DEPENDS rospy semantic_map_publisher semantic_segmentation
+ CATKIN_DEPENDS rospy semantic_map_publisher semantic_segmentation roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -104,16 +115,19 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-# add_executable(soma_pcl_segmentation_node src/soma_pcl_segmentation_node.cpp)
 
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(soma_pcl_segmentation_node soma_pcl_segmentation_generate_messages_cpp)
+## Declare a cpp executable
+add_executable(pcl_octomap_mapper src/pcl_octomap_mapper.cpp)
+
+# ## Add cmake target dependencies of the executable/library
+# ## as an example, message headers may need to be generated before nodes
+add_dependencies(pcl_octomap_mapper soma_pcl_segmentation_generate_messages_cpp )
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(soma_pcl_segmentation_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(pcl_octomap_mapper
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+)
 
 #############
 ## Install ##
