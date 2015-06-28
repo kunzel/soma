@@ -76,7 +76,7 @@ class SOMAPCLSegmentationServer():
             service = rospy.ServiceProxy(service_name, ObservationService)
             req = ObservationServiceRequest()
             req.waypoint_id = waypoint
-            req.resolution = 0.05
+            req.resolution = 0.04
             rospy.loginfo("Requesting pointcloud for waypoint: %s", waypoint)
             res = service(req)
             pointcloud = res.cloud
@@ -177,17 +177,38 @@ class SOMAPCLSegmentationServer():
         # The prior probability of a document P(d) is often treated as uniform across all d
         # and so it can also be ignored
         # results ranked by simply P(q|d)
+        _lambda = 0.8
+
+        p_env = dict()
+        for w in self.labels.keys():
+            p_label_at_wp = self.labels[w]
+            for l in p_label_at_wp:
+                if l not in p_env:
+                    p_env[l] = 0.0
+                p_env[l] += p_label_at_wp[l]
+        # normalize
+        total_sum_env = sum(p_env.values())
+        p_label_in_env = dict()
+        for label in p_env:
+            p_label_in_env[label] = p_env[label]/total_sum_env
+
         p_label_at_waypoint = self.labels[waypoint]
+
+        #print "ENV:",  p_label_in_env
+        #print "WP:", waypoint, p_label_at_waypoint
+        
         num = 1.0
         for label in self.obj_labels[obj]:
-            num *= math.pow(p_label_at_waypoint[label], self.obj_labels[obj][label])
+            #num *= math.pow(p_label_at_waypoint[label], self.obj_labels[obj][label])
+            num *= math.pow(_lambda*p_label_at_waypoint[label] + ((1.0-_lambda)*p_label_in_env[label]), self.obj_labels[obj][label])
 
         den = 0.0
         for w in self.labels.keys():
             p_label_at_waypoint = self.labels[w]
             p = 1.0
             for label in self.obj_labels[obj]:
-                p *= math.pow(p_label_at_waypoint[label], self.obj_labels[obj][label])
+                #p *= math.pow(p_label_at_waypoint[label], self.obj_labels[obj][label])
+                p *= math.pow(_lambda*p_label_at_waypoint[label] + ((1.0-_lambda)*p_label_in_env[label]), self.obj_labels[obj][label])
             den += p
 
         p_labels = num / den # waypoint_probability
@@ -203,11 +224,6 @@ class SOMAPCLSegmentationServer():
         
 
     def view_probability(self, waypoint, obj, keys, values):
-
-         # self.label_names[waypoint] = res.index_to_label_name
-         #        self.label_probs[waypoint] = res.label_probabilities
-         #        self.points[waypoint] = res.points
-
         
         probs = dict()
         
@@ -227,10 +243,13 @@ class SOMAPCLSegmentationServer():
             probs[p] = probs[p]/total_sum
         #print probs
 
+        p_label_at_waypoint = self.labels[waypoint]
         p_label_at_view = probs
         num = 1.0
         for label in self.obj_labels[obj]:
-            num *= math.pow(p_label_at_view[label], self.obj_labels[obj][label])
+            #num *= math.pow(p_label_at_view[label], self.obj_labels[obj][label])
+            _lambda = 0.8
+            num *= math.pow(_lambda*p_label_at_view[label] + (1-_lambda)*p_label_at_waypoint[label], self.obj_labels[obj][label])
 
         # denominator is not calculated as it is the same for all views
         # view probabilities are normalized in the planning step 
