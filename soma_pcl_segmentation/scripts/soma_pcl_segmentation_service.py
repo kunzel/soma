@@ -20,7 +20,7 @@ class SOMAPCLSegmentationServer():
         self.octomaps = dict()
         self.pointclouds = dict()
         self.labels = dict()
-        #self.keys = dict()
+        self.octomap_keys = dict()
         
         if kb_file:
             self._kb_file = kb_file
@@ -33,9 +33,9 @@ class SOMAPCLSegmentationServer():
 
         self._init_object_kb()
             
-        self._prob_service = rospy.Service('soma_probability_at_waypoint', GetProbabilityAtWaypoint, self.get_probability_at_waypoint)
+        self._waypoint_service = rospy.Service('soma_probability_at_waypoint', GetProbabilityAtWaypoint, self.get_probability_at_waypoint)
         
-        self._dist_service    = rospy.Service('soma_distribution_at_waypoint', GetProbabilityAtView, self.get_probability_at_view)
+        self._view_service    = rospy.Service('soma_probability_at_view', GetProbabilityAtView, self.get_probability_at_view)
         
         rospy.spin()
 
@@ -114,29 +114,60 @@ class SOMAPCLSegmentationServer():
         rospy.wait_for_service(service_name)
         rospy.loginfo("Done")
         service = rospy.ServiceProxy(service_name, LabelIntegratedPointCloud)
-        self.labels = dict()
+
+        self.label_names = dict()
+        self.labels = dict() # store p(l|d)
+        self.label_probs = dict()
+        self.label_freq = dict()
+        self.points = dict()
+        
         for waypoint in waypoints:
             try:
-                if True: #waypoint not in self.labels:
-                    self.labels[waypoint] = dict()
+                self.labels[waypoint] = dict()
                     
-                    req = LabelIntegratedPointCloudRequest()
-                    req.integrated_cloud = self.pointclouds[waypoint]
+                req = LabelIntegratedPointCloudRequest()
+                req.integrated_cloud = self.pointclouds[waypoint]
              
-                    rospy.loginfo("Requesting labelling for waypoint: %s", waypoint)
-                    res = service(req)
+                rospy.loginfo("Requesting labelling for waypoint: %s", waypoint)
+                res = service(req)
 
-                    rospy.loginfo("Received labels. names:%s", res.index_to_label_name)
-                    rospy.loginfo("Received labels. freq:%s",  res.label_frequencies)
-                    
-                    for i in range(len(res.index_to_label_name)):
-                        print res.index_to_label_name[i], res.label_frequencies[i]
-                        self.labels[waypoint][res.index_to_label_name[i]] = res.label_frequencies[i]
+                rospy.loginfo("Received labels. names:%s", res.index_to_label_name)
+                rospy.loginfo("Received labels. freq:%s",  res.label_frequencies)
+                rospy.loginfo("Received labels. probs:%s",  len(res.label_probabilities))
+                rospy.loginfo("Received labels. points:%s pointsxlabels:%s",  len(res.points), len(res.points)*len(res.index_to_label_name))
+
+                self.label_names[waypoint] = res.index_to_label_name
+                self.label_probs[waypoint] = res.label_probabilities
+                self.label_freq[waypoint] =  res.label_frequencies
+                self.points[waypoint] = res.points
+                
+                for i in range(len(res.index_to_label_name)):
+                    print res.index_to_label_name[i], res.label_frequencies[i]
+                    self.labels[waypoint][res.index_to_label_name[i]] = res.label_frequencies[i]
 
 
             except rospy.ServiceException, e:
                 rospy.logerr("Service call failed: %s"%e)
             
+    def _points_to_keys(self, points, octomap):
+
+        rospy.loginfo("Waiting for octomap points-keys mapping service")
+        service_name = '/pcl_octomap_mapper_service/pcl_octomap_mapper'
+        rospy.wait_for_service(service_name)
+        rospy.loginfo("Done")
+        try:
+            service = rospy.ServiceProxy(service_name, GetPCLOctomapMapping)
+            req = GetPCLOctomapMappingRequest()
+            req.octomap = octomap
+            req.points = points
+            rospy.loginfo("Requesting mapping for points. size:%s", len(points))
+            res = service(req)
+            keys = res.keys
+            rospy.loginfo("Received keys: size:%s", len(keys))
+
+        except rospy.ServiceException, e:
+            rospy.logerr("Service call failed: %s"%e)
+        return keys
 
 
 
@@ -169,20 +200,41 @@ class SOMAPCLSegmentationServer():
         
         return p_scaled
 
-    def view_probability(self, waypoint, obj, keys, values):
         
-        return 1.0
-        # get dict (key-> argmax prob(label))
-        # labels_octomap = dict()
-        # p_label_view =  
-        
-        # # get label dist for view {l1: 0.2 , l2: 0.5, l3: 0.1}  
-        # labels_view = {}
-        # for i in range(len(req.keys)):
-        #     k = req.keys[i]
-        #     v = req.values[i]
-        #     labels_view[labels_octomap[k]] += p_view[labels_octomap[k]]  
 
+    def view_probability(self, waypoint, obj, keys, values):
+
+         # self.label_names[waypoint] = res.index_to_label_name
+         #        self.label_probs[waypoint] = res.label_probabilities
+         #        self.points[waypoint] = res.points
+
+        
+        probs = dict()
+        
+        for k in range(len(keys)):
+            for i  in range(len(self.octomap_keys[waypoint])):
+                if keys[k] == self.octomap_keys[waypoint][i]:
+                    for j in range(len(self.label_names[waypoint])):
+                        if self.label_names[waypoint][j] not in probs:
+                            probs[self.label_names[waypoint][j]] = 0.0
+                        probs[self.label_names[waypoint][j]] += self.label_probs[waypoint][i*len(self.label_names[waypoint]) + j]
+        #print self.label_names[waypoint]
+        #print self.label_freq[waypoint]
+
+        # normalize
+        total_sum = sum(probs.values())
+        for p in probs:
+            probs[p] = probs[p]/total_sum
+        #print probs
+
+        p_label_at_view = probs
+        num = 1.0
+        for label in self.obj_labels[obj]:
+            num *= math.pow(p_label_at_view[label], self.obj_labels[obj][label])
+
+        # denominator is not calculated as it is the same for all views
+        # view probabilities are normalized in the planning step 
+        return num
         
     def get_probability_at_waypoint(self, req):
         rospy.loginfo("Received request: %s", req)
@@ -218,13 +270,17 @@ class SOMAPCLSegmentationServer():
             self.octomaps[waypoint] = octomap
 
         # call alex's service
-        self._init_fake_labels([req.waypoint])
+        self._get_labels([waypoint])
+        #self._init_fake_labels([req.waypoint])
+
+        if waypoint not in self.octomap_keys:
+            self.octomap_keys[waypoint] = self._points_to_keys(self.points[waypoint], self.octomaps[waypoint])
 
         p = 1.0 # compute joint probability for all objects
         for obj in req.objects:
-            p *= self.view_probability(waypoint,obj,req.keys,req.values)
+            p *= self.view_probability(waypoint,obj,self.octomap_keys[waypoint],req.values)
 
-        res = GetProbabilityAtView()
+        res = GetProbabilityAtViewResponse()
         res.probability = p
         rospy.loginfo("Sent response: %s", res)
         return res

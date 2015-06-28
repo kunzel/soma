@@ -3,4 +3,4 @@ string[] objects  # search objects
 uint16[] keys     # keys of the octomap 
 int32[]  values
 ---
-float32 probability 
+float64 probability 
