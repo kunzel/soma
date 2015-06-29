@@ -111,7 +111,7 @@ int main(int argc, char **argv){
   ros::init(argc, argv, "pcl_octomap_mapper_service");
   ros::NodeHandle nh("~");
   ros::ServiceServer pcl_octomap_mapper_service = nh.advertiseService("pcl_octomap_mapper", map_points_to_keys);
-  ROS_INFO("Semantic segmentation service ready.");
+  ROS_INFO("pcl-octomap mapper service ready.");
   ros::spin();
 
   return 0;
