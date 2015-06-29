@@ -1,56 +1,56 @@
 {
-  "cup1" : 
+  "asus_box" : 
   {
-    "type" :      "Cup",
+    "type" :      "AsusBox",
     "probability": 0.8, 
     "cost": 120.0, 
     "labels" : {
-      "wall hanger": 1, 
-      "whiteboard": 1, 
+      "prop" : 1, 
+      "wall" : 1, 
       "cabinet": 1, 
       "ceiling": 1, 
-      "sofa": 1, 
+      "chair/sofa": 1, 
       "window": 1, 
       "floor": 1, 
-      "monitor": 1, 
+      "monitor/tv": 1, 
       "person": 1, 
       "shelf": 1, 
       "table": 1
     }
   },
-  "mug1" : 
+  "jasmine_green_tea" : 
   {
-    "type" :      "Cup",
+    "type" :      "TeaBox",
     "probability": 0.8,
     "cost": 120.0, 
     "labels" : {
-      "wall hanger": 1, 
-      "whiteboard": 1, 
-      "cabinet": 1, 
+      "prop" : 1, 
+      "wall" : 1, 
+      "cabinet": 5, 
       "ceiling": 1, 
-      "sofa": 1, 
+      "chair/sofa": 1, 
       "window": 1, 
       "floor": 1, 
-      "monitor": 1, 
+      "monitor/tv": 1, 
       "person": 1, 
       "shelf": 1, 
       "table": 1
     }
   },
-  "book1" : 
+  "yellow_toy_car" : 
   {
-    "type" :      "Book",
+    "type" :      "ToyCar",
     "probability": 0.8, 
     "cost": 120.0, 
     "labels" : {
-      "wall hanger": 1, 
-      "whiteboard": 1, 
+      "prop" : 1, 
+      "wall" : 1, 
       "cabinet": 1, 
       "ceiling": 1, 
-      "sofa": 1, 
+      "chair/sofa": 1, 
       "window": 1, 
       "floor": 1, 
-      "monitor": 1, 
+      "monitor/tv": 1, 
       "person": 1, 
       "shelf": 1, 
       "table": 1

@@ -76,7 +76,7 @@ class SOMAPCLSegmentationServer():
             service = rospy.ServiceProxy(service_name, ObservationService)
             req = ObservationServiceRequest()
             req.waypoint_id = waypoint
-            req.resolution = 0.04
+            req.resolution = 0.01 # send 1cm resolution to semantic_segmentation
             rospy.loginfo("Requesting pointcloud for waypoint: %s", waypoint)
             res = service(req)
             pointcloud = res.cloud
@@ -145,7 +145,18 @@ class SOMAPCLSegmentationServer():
                     print res.index_to_label_name[i], res.label_frequencies[i]
                     self.labels[waypoint][res.index_to_label_name[i]] = res.label_frequencies[i]
 
+                # import pylab as pl
+                # import numpy as np
 
+                # print "WP:", waypoint
+                # d = self.labels[waypoint]
+                # X = np.arange(len(d))
+                # pl.bar(X, d.values(), align='center', width=0.5)
+                # pl.xticks(X, d.keys())
+                # ymax = max(d.values()) + 1
+                # pl.ylim(0, ymax)
+                # pl.show()
+                
             except rospy.ServiceException, e:
                 rospy.logerr("Service call failed: %s"%e)
             
@@ -191,6 +202,7 @@ class SOMAPCLSegmentationServer():
         p_label_in_env = dict()
         for label in p_env:
             p_label_in_env[label] = p_env[label]/total_sum_env
+
 
         p_label_at_waypoint = self.labels[waypoint]
 
@@ -250,7 +262,6 @@ class SOMAPCLSegmentationServer():
             #num *= math.pow(p_label_at_view[label], self.obj_labels[obj][label])
             _lambda = 0.8
             num *= math.pow(_lambda*p_label_at_view[label] + (1-_lambda)*p_label_at_waypoint[label], self.obj_labels[obj][label])
-
         # denominator is not calculated as it is the same for all views
         # view probabilities are normalized in the planning step 
         return num
