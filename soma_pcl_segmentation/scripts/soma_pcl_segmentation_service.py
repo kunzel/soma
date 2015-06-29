@@ -21,7 +21,8 @@ class SOMAPCLSegmentationServer():
         self.pointclouds = dict()
         self.labels = dict()
         self.octomap_keys = dict()
-
+        self.octomap_key_idx = dict()
+        
         self.label_names = dict()
         #self.labels = dict() # store p(l|d)
         self.label_probs = dict()
@@ -247,15 +248,30 @@ class SOMAPCLSegmentationServer():
     def view_probability(self, waypoint, obj, keys, values):
         
         probs = dict()
+        # OLD
+        # for k in range(len(keys)):
+        #     for i  in range(len(self.octomap_keys[waypoint])):
+        #         if keys[k] == self.octomap_keys[waypoint][i]:
+        #             for j in range(len(self.label_names[waypoint])):
+        #                 if self.label_names[waypoint][j] not in probs:
+        #                     probs[self.label_names[waypoint][j]] = 0.0
+        #                 probs[self.label_names[waypoint][j]] += self.label_probs[waypoint][i*len(self.label_names[waypoint]) + j]
 
-        # TODO: SPEED UP!
-        for k in range(len(keys)):
-            for i  in range(len(self.octomap_keys[waypoint])):
-                if keys[k] == self.octomap_keys[waypoint][i]:
-                    for j in range(len(self.label_names[waypoint])):
-                        if self.label_names[waypoint][j] not in probs:
-                            probs[self.label_names[waypoint][j]] = 0.0
-                        probs[self.label_names[waypoint][j]] += self.label_probs[waypoint][i*len(self.label_names[waypoint]) + j]
+        if waypoint not in self.octomap_key_idx:
+            self.octomap_key_idx[waypoint] = dict() 
+            for idx in range(len(self.octomap_keys[waypoint])):
+                key = self.octomap_keys[waypoint][idx] 
+                if key not in self.octomap_key_idx[waypoint]:
+                    self.octomap_key_idx[waypoint][key] = list()
+                self.octomap_key_idx[waypoint][key].append(idx)
+                    
+        for k in keys:
+            for i in self.octomap_key_idx[waypoint][k]:
+                for j in range(len(self.label_names[waypoint])):
+                    if self.label_names[waypoint][j] not in probs:
+                        probs[self.label_names[waypoint][j]] = 0.0
+                    probs[self.label_names[waypoint][j]] += self.label_probs[waypoint][i*len(self.label_names[waypoint]) + j]
+        
         #print self.label_names[waypoint]
         #print self.label_freq[waypoint]
 
