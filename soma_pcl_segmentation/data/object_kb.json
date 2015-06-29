@@ -26,7 +26,7 @@
     "labels" : {
       "prop" : 1, 
       "wall" : 1, 
-      "cabinet": 5, 
+      "cabinet": 2, 
       "ceiling": 1, 
       "chair/sofa": 1, 
       "window": 1, 
