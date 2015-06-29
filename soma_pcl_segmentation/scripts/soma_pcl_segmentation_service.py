@@ -21,6 +21,12 @@ class SOMAPCLSegmentationServer():
         self.pointclouds = dict()
         self.labels = dict()
         self.octomap_keys = dict()
+
+        self.label_names = dict()
+        #self.labels = dict() # store p(l|d)
+        self.label_probs = dict()
+        self.label_freq = dict()
+        self.points = dict()
         
         if kb_file:
             self._kb_file = kb_file
@@ -115,15 +121,18 @@ class SOMAPCLSegmentationServer():
         rospy.loginfo("Done")
         service = rospy.ServiceProxy(service_name, LabelIntegratedPointCloud)
 
-        self.label_names = dict()
-        self.labels = dict() # store p(l|d)
-        self.label_probs = dict()
-        self.label_freq = dict()
-        self.points = dict()
+        # self.label_names = dict()
+        # #self.labels = dict() # store p(l|d)
+        # self.label_probs = dict()
+        # self.label_freq = dict()
+        # self.points = dict()
         
         for waypoint in waypoints:
             try:
-                self.labels[waypoint] = dict()
+                if waypoint not in self.labels:
+                    self.labels[waypoint] = dict()
+                else:
+                    continue # skip waypoint
                     
                 req = LabelIntegratedPointCloudRequest()
                 req.integrated_cloud = self.pointclouds[waypoint]
@@ -182,7 +191,7 @@ class SOMAPCLSegmentationServer():
 
 
 
-    def waypoint_probability(self, waypoint, obj):
+    def waypoint_probability(self, waypoint, waypoints, obj):
         # P(d|q) = P(q|d)P(d)/P(q)
         # P(q) is the same for all documents
         # The prior probability of a document P(d) is often treated as uniform across all d
@@ -191,7 +200,7 @@ class SOMAPCLSegmentationServer():
         _lambda = 0.8
 
         p_env = dict()
-        for w in self.labels.keys():
+        for w in waypoints: #self.labels.keys():
             p_label_at_wp = self.labels[w]
             for l in p_label_at_wp:
                 if l not in p_env:
@@ -215,7 +224,7 @@ class SOMAPCLSegmentationServer():
             num *= math.pow(_lambda*p_label_at_waypoint[label] + ((1.0-_lambda)*p_label_in_env[label]), self.obj_labels[obj][label])
 
         den = 0.0
-        for w in self.labels.keys():
+        for w in waypoints: #self.labels.keys():
             p_label_at_waypoint = self.labels[w]
             p = 1.0
             for label in self.obj_labels[obj]:
@@ -238,7 +247,8 @@ class SOMAPCLSegmentationServer():
     def view_probability(self, waypoint, obj, keys, values):
         
         probs = dict()
-        
+
+        # TODO: SPEED UP!
         for k in range(len(keys)):
             for i  in range(len(self.octomap_keys[waypoint])):
                 if keys[k] == self.octomap_keys[waypoint][i]:
@@ -283,7 +293,7 @@ class SOMAPCLSegmentationServer():
 
         for waypoint in req.waypoints:
             for obj in req.objects:
-                p = self.waypoint_probability(waypoint,obj)
+                p = self.waypoint_probability(waypoint,req.waypoints, obj)
                 res.probability.append(p)
                 res.cost.append(self.obj_cost[obj])
         rospy.loginfo("Sent response: %s", res)
@@ -308,7 +318,7 @@ class SOMAPCLSegmentationServer():
 
         p = 1.0 # compute joint probability for all objects
         for obj in req.objects:
-            p *= self.view_probability(waypoint,obj,self.octomap_keys[waypoint],req.values)
+            p *= self.view_probability(waypoint,obj,self.octomap_keys[waypoint][:100],req.values)
 
         res = GetProbabilityAtViewResponse()
         res.probability = p
