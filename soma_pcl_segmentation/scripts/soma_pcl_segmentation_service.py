@@ -246,6 +246,9 @@ class SOMAPCLSegmentationServer():
         
 
     def view_probability(self, waypoint, obj, keys, values):
+
+        if keys == []:
+            return 0.0
         
         probs = dict()
         # OLD
@@ -332,9 +335,16 @@ class SOMAPCLSegmentationServer():
         if waypoint not in self.octomap_keys:
             self.octomap_keys[waypoint] = self._points_to_keys(self.points[waypoint], self.octomaps[waypoint])
 
+        keys = []
+        for k in req.keys:
+            if k in self.octomap_keys[waypoint]:
+                keys.append(k)
+#            else:
+#                print "KEY ERROR!!!"
+
         p = 1.0 # compute joint probability for all objects
         for obj in req.objects:
-            p *= self.view_probability(waypoint,obj,self.octomap_keys[waypoint][:100],req.values)
+            p *= self.view_probability(waypoint,obj,keys,req.values)
 
         res = GetProbabilityAtViewResponse()
         res.probability = p
