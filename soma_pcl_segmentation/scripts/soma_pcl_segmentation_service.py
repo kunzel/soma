@@ -18,7 +18,7 @@ class SOMAPCLSegmentationServer():
     def __init__(self, kb_file=None):
 
         self.octomaps = dict()
-        self.pointclouds = dict()
+        #self.pointclouds = dict()
         self.labels = dict()
         self.octomap_keys = dict()
         self.octomap_key_idx = dict()
@@ -136,8 +136,9 @@ class SOMAPCLSegmentationServer():
                     continue # skip waypoint
                     
                 req = LabelIntegratedPointCloudRequest()
-                req.integrated_cloud = self.pointclouds[waypoint]
-             
+                #req.integrated_cloud = self.pointclouds[waypoint]
+                req.waypoint_id = waypoint
+                
                 rospy.loginfo("Requesting labelling for waypoint: %s", waypoint)
                 res = service(req)
 
@@ -297,10 +298,10 @@ class SOMAPCLSegmentationServer():
         
     def get_probability_at_waypoint(self, req):
         rospy.loginfo("Received request: %s", req)
-        for waypoint in req.waypoints:
-            if waypoint not in self.pointclouds: 
-                cloud = self._get_pointcloud(waypoint)
-                self.pointclouds[waypoint] = cloud
+        # for waypoint in req.waypoints:
+        #     if waypoint not in self.pointclouds: 
+        #         cloud = self._get_pointcloud(waypoint)
+        #         self.pointclouds[waypoint] = cloud
 
         # call alex's service
         self._get_labels(req.waypoints)
@@ -321,9 +322,9 @@ class SOMAPCLSegmentationServer():
     def get_probability_at_view(self, req):
         rospy.loginfo("Received request: %s", req)
         waypoint = req.waypoint
-        if waypoint not in self.pointclouds: 
-            cloud = self._get_pointcloud(waypoint)
-            self.pointclouds[waypoint] = cloud
+        # if waypoint not in self.pointclouds: 
+        #     cloud = self._get_pointcloud(waypoint)
+        #     self.pointclouds[waypoint] = cloud
         if waypoint not in self.octomaps: 
             octomap = self._get_octomap(waypoint)
             self.octomaps[waypoint] = octomap
@@ -339,8 +340,8 @@ class SOMAPCLSegmentationServer():
         for k in req.keys:
             if k in self.octomap_keys[waypoint]:
                 keys.append(k)
-#            else:
-#                print "KEY ERROR!!!"
+            else:
+                print "KEY ERROR!!!"
 
         p = 1.0 # compute joint probability for all objects
         for obj in req.objects:
