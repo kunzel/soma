@@ -1,7 +1,4 @@
-sensor_msgs/PointCloud2 pcl
-string[] labels
-float32[] probabilities
+geometry_msgs/Point32[] points
 octomap_msgs/Octomap octomap
 ---
 uint16[] keys
-string[] labels

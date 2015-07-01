@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   semantic_segmentation
   roscpp
   std_msgs
+  geometry_msgs
   sensor_msgs
   pcl_ros
   octomap_msgs
@@ -78,8 +79,9 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
-  sensor_msgs
+  geometry_msgs
   octomap_msgs
+  sensor_msgs
 )
 
 ###################################
