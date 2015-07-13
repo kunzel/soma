@@ -92,6 +92,8 @@ class SOMAManager():
         
         self.load_objects()
 
+        self.update_objects()
+
         rospy.spin()
 
 
@@ -263,6 +265,29 @@ class SOMAManager():
         
         self._server.erase(soma_id)
         self._server.applyChanges()
+
+    def update_objects(self):
+        rospy.loginfo("Update all objects (incl. geospatial store)")
+        for k in self._soma_obj_ids.keys():
+            _id = self._soma_obj_ids[k]
+            msg = self._soma_obj_msg[k]
+            
+            new_msg = copy.deepcopy(msg)
+
+            self._msg_store.update_id(_id, new_msg)
+
+            # geospatial store
+            # delete old message
+            res = self._gs_store.find_one({'soma_id': new_msg.id,
+                                           'soma_map': self.soma_map,
+                                           'soma_config': self.soma_conf})
+            if res:
+                _gs_id = res['_id']
+                self._gs_store.remove(_gs_id)
+
+            # add new object to geospatial store
+            self._gs_store.insert(self.geo_json_from_soma_obj(new_msg))
+        rospy.loginfo("Done")
         
     def update_object(self, feedback):
         print "Updated marker " + feedback.marker_name
