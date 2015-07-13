@@ -145,6 +145,8 @@ class SOMAROIManager():
         
         self.load_objects()
 
+        self.update_objects()
+
         rospy.spin()
 
 
@@ -322,7 +324,7 @@ class SOMAROIManager():
     def load_object(self, soma_id, roi, soma_type, pose):
 
         int_marker = self.create_object_marker(soma_id, roi, soma_type, pose)
-        
+
         self._server.insert(int_marker, self._update_cb)
 
         self.menu_handler.apply( self._server, soma_id )
@@ -438,11 +440,45 @@ class SOMAROIManager():
         if geo_json:
             try:
                 self._gs_store.insert(geo_json)
-                rospy.loginfo("GS Store: updated roi (%s %s)" % (old_msg.type, old_msg.roi_id) )
+                rospy.loginfo("GS Store: update roi (%s %s)" % (old_msg.type, old_msg.roi_id) )
             except:
                 rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (old_msg.type, old_msg.roi_id))
     
-        
+
+    def update_objects(self):
+        rospy.loginfo("Update all objects (incl. geospatial store)")
+
+        for k in self._soma_obj_ids.keys():
+            _id = self._soma_obj_ids[k]
+            msg = self._soma_obj_msg[k]
+
+            new_msg = copy.deepcopy(msg)
+
+            # no change in pose!!!
+            
+            self._msg_store.update_id(_id, new_msg)
+
+            # geospatial store
+            # delete old message
+            res = self._gs_store.find_one({'soma_roi_id': new_msg.roi_id,
+                                           'soma_map': self.soma_map,
+                                           'soma_config': self.soma_conf})
+            if res:
+                _gs_id = res['_id']
+                self._gs_store.remove(_gs_id)
+                #rospy.loginfo("GS Store: deleted roi")            
+
+            # add new object to geospatial store
+            geo_json = self.geo_json_from_soma_obj(new_msg)
+            if geo_json:
+                try:
+                    self._gs_store.insert(geo_json)
+                except:
+                    rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (new_msg.type, new_msg.roi_id))
+
+        rospy.loginfo("Done")
+            
+                
     def update_object(self, feedback):
         rospy.loginfo("Updated marker: %s", feedback.marker_name)
 
