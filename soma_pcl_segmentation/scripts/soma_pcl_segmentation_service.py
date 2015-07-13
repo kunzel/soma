@@ -13,6 +13,10 @@ from semantic_segmentation.srv import LabelIntegratedPointCloud, LabelIntegrated
 from semantic_map_publisher.srv import ObservationOctomapServiceRequest, ObservationOctomapService, ObservationServiceRequest, ObservationService
 from sensor_msgs.msg import PointCloud2
 
+from visualization_msgs.msg import MarkerArray, Marker
+from strands_navigation_msgs.srv import GetTopologicalMap
+
+
 class SOMAPCLSegmentationServer():
 
     def __init__(self, kb_file=None):
@@ -43,6 +47,10 @@ class SOMAPCLSegmentationServer():
         self._waypoint_service = rospy.Service('soma_probability_at_waypoint', GetProbabilityAtWaypoint, self.get_probability_at_waypoint)
         
         self._view_service    = rospy.Service('soma_probability_at_view', GetProbabilityAtView, self.get_probability_at_view)
+        
+        self._prob_marker_pub =  rospy.Publisher('/object_search/object_probabilities', MarkerArray, queue_size = 1)
+        get_top_map_srv = rospy.ServiceProxy('/topological_map_publisher/get_topological_map', GetTopologicalMap)
+        self._topo_map = get_top_map_srv(rospy.get_param('topological_map_name')).map.nodes
         
         rospy.spin()
 
@@ -316,8 +324,78 @@ class SOMAPCLSegmentationServer():
                 p = self.waypoint_probability(waypoint,req.waypoints, obj)
                 res.probability.append(p)
                 res.cost.append(self.obj_cost[obj])
+        self.publish_prob(req.waypoints, req.objects, res.probability)
         rospy.loginfo("Sent response: %s", res)
         return res
+    
+    #BULSHIT below
+    def publish_prob2(self, waypoints, objects, probs):
+        prob_msg = MarkerArray() 
+        i = 0
+        idx = 0
+        n_waypoints = len(waypoints)
+        n_objects = len(objects)        
+        scaling_factor = max(probs) 
+        current_probs = [0 for foo in objects]
+        for node in self._topo_map:
+            if node.name in waypoints:
+                for j in range(0, n_objects):
+                    marker = Marker()
+                    marker.header.frame_id = 'map'
+                    marker.id = idx
+                    marker.type = Marker.CYLINDER
+                    marker.action = Marker.ADD
+                    marker.pose = node.pose
+                    prob = probs[n_objects*i + j]
+                    prob = prob/(scaling_factor)
+                    print "AHAHHAHBHBHBHBHBHB", prob
+                    marker.pose.position.z  = marker.pose.position.z + current_probs[j]
+                    marker.scale.x = 1*prob
+                    marker.scale.y = 1*prob                
+                    marker.scale.z = 1*prob
+                    current_probs[j] = current_probs[j] + prob + 0.1
+                    marker.color.a = 1.0
+                    marker.color.r = 1.0*prob
+                    marker.color.g = 1.0*prob
+                    marker.color.b = 1.0*prob
+                    prob_msg.markers.append(marker)
+                    idx = idx + 1
+                i = i + 1
+        self._prob_marker_pub.publish(prob_msg)    
+    
+    
+    def publish_prob(self, waypoints, objects, probs):
+        prob_msg = MarkerArray() 
+        i = 0
+        n_waypoints = len(waypoints)
+        n_objects = len(objects)        
+        scaling_factor = max(probs)      
+        for node in self._topo_map:
+            if node.name in waypoints:
+                marker = Marker()
+                marker.header.frame_id = 'map'
+                marker.id = i
+                marker.type = Marker.CYLINDER
+                marker.action = Marker.ADD
+                marker.pose = node.pose
+                prob = 1
+                for j in range(0, n_objects):
+                    prob = prob*probs[n_objects*i + j]
+                prob = prob/(scaling_factor**2)
+                print prob
+                marker.scale.x = 1*prob
+                marker.scale.y = 1*prob                
+                marker.scale.z = 1
+                marker.color.a = 1.0
+                marker.color.r = 0.0
+                marker.color.g = 1.0
+                marker.color.b = 0.0
+                prob_msg.markers.append(marker)
+                i = i + 1
+        self._prob_marker_pub.publish(prob_msg)
+        
+        
+        
 
     def get_probability_at_view(self, req):
         rospy.loginfo("Received request: %s", req)
