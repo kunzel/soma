@@ -27,7 +27,7 @@ input:
 Run the SOMA region analysis:
 
     ```
-    $ rosrun soma_data_analysis object_clustering.py 
+    $ rosrun soma_data_analysis region_identifying.py 
     ```
 input:
 
