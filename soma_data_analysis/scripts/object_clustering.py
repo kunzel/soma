@@ -32,15 +32,15 @@ class identify_objects:
          self.prob=dict()
          self.points=dict()
          self.label=dict()
-         label_names=json.load(open("data/label_names_large.json","r"))
+         label_names=json.load(open("label_names_large.json","r"))
          self.label_names=label_names[waypoint]
          self.objects=dict()
          self.position_matrix=dict()
          for instance in instances:
              print 'for', instance
              self.objects[instance]=dict()
-             self.points[instance]=json.load(open('data/'+waypoint+str(instance)+"points_large.json","r"))
-             self.prob[instance]=json.load(open('data/'+waypoint+str(instance)+"prob_large.json","r"))
+             self.points[instance]=json.load(open(waypoint+str(instance)+"points_large.json","r"))
+             self.prob[instance]=json.load(open(waypoint+str(instance)+"prob_large.json","r"))
              self.asign_label(waypoint,instance)
              self.position_matrix[instance]=dict()
              for objects in self.label_names[unicode(instance)]:
