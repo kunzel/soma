@@ -1,5 +1,17 @@
 SOMA data analysis 
 ------------------
+Generate the data:
+
+    ```
+    $ roslaunch semantic_map_launcher semantic_map.launch 
+    ```
+
+    ```
+    $ roslaunch semantic_segmentation semantic_segmentation_plus.launch 
+    ```
+    ```
+    $ rosrun soma_data_analysis my_pcl_segmentation.py 
+    ```
 Run the SOMA object analysis:
 
     ```
@@ -36,4 +48,6 @@ input:
 2. for operation, input one of the following operations: 
   * "outter"    :  generate and display the outter region given one waypoint and instance.
   * "inner"     :  generate and display the region that robot can move freely given one waypoint and    instance.
+
+
 
