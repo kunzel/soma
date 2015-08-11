@@ -40,6 +40,8 @@ output:
 
 1. box&cloud function:(waypoint15,instance0,label4[chair])
 
+(yellow part is the acutal cloud)
+
 ![marker](https://raw.githubusercontent.com/duanby/soma/data_analysis/soma_data_analysis/images/box&cloud.png)
 
 2. single function:(waypoint15,instance0,label10[table],object0)
@@ -64,6 +66,10 @@ input:
 output:
 
 1. box&cloud function:(waypoint15,instance0)
+
+(green dots represent the convex of outter region)
+
+(reg region represents the region that robot can move freely)
 
 ![marker](https://raw.githubusercontent.com/duanby/soma/data_analysis/soma_data_analysis/images/roi.png)
 
