@@ -39,9 +39,9 @@ class identify_region:
         self.points=dict()
         for instance in instances:
             self.position_matrix[instance]=dict()
-            self.prob[instance]=json.load(open('data/'+waypoint+str(instance)+"prob_large.json","r"))
-            self.points[instance]=json.load(open('data/'+waypoint+str(instance)+"points_large.json","r"))
-            label_names=json.load(open("data/label_names_large.json","r"))
+            self.prob[instance]=json.load(open(waypoint+str(instance)+"prob_large.json","r"))
+            self.points[instance]=json.load(open(waypoint+str(instance)+"points_large.json","r"))
+            label_names=json.load(open("label_names_large.json","r"))
             self.label_names=label_names[waypoint][unicode(0)]
             prob=np.array(self.prob[instance]).reshape(-1,11)
             points=self.points[instance]
