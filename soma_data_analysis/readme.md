@@ -7,7 +7,7 @@ Generate the data:
     ```
 
     ```
-    $ roslaunch semantic_segmentation semantic_segmentation_plus.launch 
+    $ roslaunch semantic_segmentation semantic_segmentation_integrate.launch 
     ```
     ```
     $ rosrun soma_data_analysis my_pcl_segmentation.py 
