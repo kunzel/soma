@@ -73,15 +73,15 @@ class my_client:
                     rospy.loginfo("processing :%s during %s", waypoint, instance)
                     self.label_names[waypoint][instance] = label_info.index_to_label_name
                     self.label_prob[waypoint] [instance]= label_info.label_probabilities
-                    self.label_frq[waypoint][instance] =  label_info.label_frequencies
+                    #self.label_frq[waypoint][instance] =  label_info.label_frequencies
                     position=[]
                     for i in range(len(label_info.points)):
-                            position=[label_info.points[i].x, label_info.points[i].y, label_info.points[i].z]+position
+                            position=position+[label_info.points[i].x, label_info.points[i].y, label_info.points[i].z]
                     position=np.array(position).reshape(-1,3)
                     self.points[waypoint][instance]=position.tolist()
-                    self.labels[waypoint][instance]=dict()
-                    for i in range(len(label_info.index_to_label_name)):
-                        self.labels[waypoint][instance][label_info.index_to_label_name[i]] = label_info.label_frequencies[i]
+                    #self.labels[waypoint][instance]=dict()
+                    #for i in range(len(label_info.index_to_label_name)):
+                        #self.labels[waypoint][instance][label_info.index_to_label_name[i]] = label_info.label_frequencies[i]
                     prob=open(waypoint+str(instance)+"prob_large.json","w")
                     json.dump(self.label_prob[waypoint][instance],prob,indent=4)
                     points=open(waypoint+str(instance)+"points_large.json","w")
@@ -177,7 +177,7 @@ class my_client:
 #cluster 
     def cluster_part_old(self,waypoint):
         #cifiw clustering
-        #waypoint=json.loads(raw_input('which waypoint to cluster'))
+        #waypoint=json.loads(raw_input('which waypoint to cluster'))boyanduan
         feature=json.load(open("feature_large.json","r"))
         X=np.array(feature['part'][waypoint])
         centroids,_=kmeans(X,3)

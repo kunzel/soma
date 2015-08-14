@@ -52,7 +52,7 @@ class identify_objects:
                  print 'setting',objects
                  for i in range(len(self.label[instance])):
                      if self.label[instance][i]==objects:
-                         temp=self.points[instance][i]+temp
+                         temp=temp+self.points[instance][i]
                  self.position_matrix[instance][objects]=np.array(temp).reshape(-1,3)
            
 # for every point, asign the label with the max probability
