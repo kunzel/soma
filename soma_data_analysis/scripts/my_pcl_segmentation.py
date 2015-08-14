@@ -51,7 +51,7 @@ class my_client:
 
     def label_client(self,request):
         rospy.loginfo("waiting for service")
-        rospy.wait_for_service('/semantic_segmentation_plus_node/label_integrated_cloud')
+        rospy.wait_for_service('/semantic_segmentation_integrate_node/label_integrated_cloud')
         rospy.loginfo("start right now")
         X=[]
         Y=dict()
@@ -64,7 +64,7 @@ class my_client:
                 #if instance > self.range[waypoint]-1:
                    #sys.exit('index out of range')
                 #else:
-                    point_information=rospy.ServiceProxy('/semantic_segmentation_plus_node/label_integrated_cloud',LabelIntegratedPointInstanceCloud)
+                    point_information=rospy.ServiceProxy('/semantic_segmentation_integrate_node/label_integrated_cloud_plus',LabelIntegratedPointInstanceCloud)
                     req=LabelIntegratedPointInstanceCloudRequest()
 	            req.waypoint_id = waypoint
                     req.instance_number=instance
