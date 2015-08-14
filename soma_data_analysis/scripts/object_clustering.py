@@ -36,14 +36,18 @@ class identify_objects:
          self.label_names=label_names[waypoint]
          self.objects=dict()
          self.position_matrix=dict()
+         self.tag=dict()
+         self.predict=dict()
          for instance in instances:
              print 'for', instance
              self.objects[instance]=dict()
+             self.tag[instance]=dict()
              self.points[instance]=json.load(open(waypoint+str(instance)+"points_large.json","r"))
              self.prob[instance]=json.load(open(waypoint+str(instance)+"prob_large.json","r"))
              self.asign_label(waypoint,instance)
              self.position_matrix[instance]=dict()
              for objects in self.label_names[unicode(instance)]:
+                 self.tag[instance][objects]=dict()
                  temp=[]
                  print 'setting',objects
                  for i in range(len(self.label[instance])):
@@ -103,6 +107,7 @@ class identify_objects:
          _,_,feature=self.sub_cluster_points(waypoint,instance,objects,1)
          if len(feature)<50:
             print 'no such object in this room'
+            return 0,0,[]
          else :
             k=self.select_k(waypoint,instance,objects)
             #k=math.sqrt(len(feature)/2)
@@ -113,12 +118,14 @@ class identify_objects:
      def set_box(self,waypoint,instance,objects):
          idx,centroids,feature=self.cluster_points(waypoint,instance,objects)
          self.objects[instance][objects]=dict()
-         for i in range(len(centroids)):
+         if feature != [] :
+            for i in range(len(centroids)):
              part_feature=np.array(feature[np.where(idx==i)])
              #print len(part_feature)
              if len(part_feature)<50:
                 #print 'ignore this cluster'
                 self.objects[instance][objects][i]=[]
+                self.tag[instance][objects][i]=-1
              else:
                 maxi=[0]*3
                 mini=[0]*3
@@ -133,6 +140,7 @@ class identify_objects:
                     mini[axis]=np.percentile(part_feature[:,axis],20) 
                     aver[axis]=np.percentile(part_feature[:,axis],50)  
                 self.objects[instance][objects][i]=[maxi,mini,aver,a,b,c]
+                self.tag[instance][objects][i]=[]
 
 #draw bounding boxes given a kind of label
      def draw(self,instance,objects):
@@ -171,6 +179,7 @@ class identify_objects:
                         m.id=id_num
                         id_num+=1
                  i=i+1
+
          while not rospy.is_shutdown():
                  publisher.publish(markerArray)
                  rospy.sleep(0.01)
@@ -263,8 +272,9 @@ class identify_objects:
                    i=0
                 else :
                    for index, table in self.objects[instance]['table'].items():
-                      if self.above(table,tv):
-                          count=count+1
+                      if table != []:
+                          if self.above(table,tv):
+                              count=count+1
                    total=total+1
         p=count/total
         print p
@@ -296,7 +306,72 @@ class identify_objects:
         p=count/total
         print p 
         return p
-                        
+
+#compute the average position and size of one object given a list of instances       
+     def overview(self,waypoint,instances,objects):
+         current=0
+         data=[]
+         self.predict[objects]=dict()
+         for instance in instances:
+             self.set_box(waypoint,instance,objects)
+         for i in range(2):
+             instance=instances[i]
+             print 'first instance',i
+             for k in self.objects[instance][objects].keys():
+                 print 'object',k
+                 if self.tag[instance][objects][k]==[]:
+                     data=[self.objects[instance][objects][k]]
+                     for j in range(i+1,len(instances)):
+                         print 'last instance',j
+                         instance_plus=instances[j]
+                         index=self.search(waypoint,instance,instance_plus,objects,k)
+                         if index < 100:
+                                 self.tag[instance_plus][objects][index]=current
+                                 data=data+[self.objects[instance_plus][objects][index]]
+                     if len(data)>len(instances)-3:
+                         data=np.array(data)
+                         self.predict[objects][current]=np.mean(data,axis=0)
+                     current = current + 1
+                     print 'a new object'
+
+# visualize the prediction                        
+     def preview(self,waypoint,instances):
+        topic='visualization_marker_array'
+        publisher=rospy.Publisher(topic,MarkerArray,queue_size=10)
+        rospy.init_node('register',anonymous=True)
+        markerArray=MarkerArray()
+        color=0
+        for objects in ["chair/sofa","monitor/tv","table"]:
+            self.overview(waypoint,instances,objects)
+            for index, data in self.predict[objects].items():
+                   maxi=data[0]
+                   mini=data[1]
+                   ave=data[2]
+                   marker = Marker()
+                   marker.header.frame_id = "/map"
+                   marker.ns="predict_box"
+                   marker.type = marker.CUBE
+                   marker.action = marker.ADD
+                   marker.scale.x = maxi[0]-mini[0]
+                   marker.scale.y = maxi[1]-mini[1]
+                   marker.scale.z = maxi[2]-mini[2]
+                   marker.color.a = 1.0
+                   marker.color.r = color
+                   marker.color.g = 1-color
+                   marker.pose.orientation.w = 1.0
+                   marker.pose.position.x = ave[0]
+                   marker.pose.position.y = ave[1]
+                   marker.pose.position.z = ave[2]
+                   markerArray.markers.append(marker)
+                   id_num=0
+                   for m in markerArray.markers:
+                       m.id=id_num
+                       id_num+=1
+            color=color+1/2
+        print 'start drawing'
+        while not rospy.is_shutdown():
+                publisher.publish(markerArray)
+                rospy.sleep(0.01)              
 
 #search the objects in instance2 which is considered as the same object as objects[i] in instance1
      def search(self,waypoint,instance1,instance2,objects,i): 
@@ -305,10 +380,12 @@ class identify_objects:
          index=100
          for j in self.objects[instance2][objects].keys():
              data2=self.objects[instance2][objects][j]
-             if distance.euclidean(data1[2],data2[2])< min([1.5,record]):
-                index=j
-                record=distance.euclidean(data1[2],data2[2])
+             if data2 != []:
+                if distance.euclidean(data1[2],data2[2])< min([1.5,record]):
+                   index=j
+                   record=distance.euclidean(data1[2],data2[2])
          return index
+
 #generate the distribution of the movement of a single object            
      def single_object_over_time(self,waypoint,instances,objects,i,draw_region=0,draw_distribution=0):
          centre=[]
@@ -347,7 +424,7 @@ class identify_objects:
                      marker.id=1
                      marker.type = marker.LINE_LIST
                      marker.action = marker.ADD
-                     marker.scale.x = 0.03
+                     marker.scale.x = 0.1
                      marker.color.a = 1.0
                      marker.color.r =1.0
                      marker.points = points
@@ -403,12 +480,15 @@ if __name__ == "__main__":
       objects.monitor_spatial(waypoint,instances)
    elif mission == 'chair_spatial':
       objects.chair_spatial(waypoint,instances)
+   elif mission == 'predict':
+      objects.preview(waypoint,instances)
    else :
       print 'wrong order' 
    #waypoint="WayPoint42"
    #instances=[0,1,2,3,4]
    #req=[u"WayPoint15",[0,1,2,3,4]]
    #objects=identify_objects(unidecode(req[0]),req[1])
+   #objects.preview(unidecode(req[0]),req[1])
    #print 'finish setting'
    #mean,cov=objects.single_object_over_time(unidecode(req[0]),req[1],label_type[4],0,draw=0)
    #objects.bounding_box(unidecode(req[0]),req[1][0],label_type[10]) 
