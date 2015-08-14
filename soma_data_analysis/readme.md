@@ -27,6 +27,7 @@ input:
   * "single" :  compute the distribution of the movement of a single object given a list of instances, one label and one specific object and display the region where this object is movable.
   * "tv_spatial" : compute the possibility of a tv being on a table given a list of instances.
   * "chair_spatial" : compute the possibility of a chair being near a table given a list of instances.
+  * "predict" : predict the scene ( positions of table, chair and monitor) of one waypoint given a list of instances.
 
 3. for request instances, input instances corresponding to the operation in the form: [0] or [0,1,2,5]
 
@@ -44,11 +45,17 @@ output:
 
 ![marker](https://raw.githubusercontent.com/duanby/soma/data_analysis/soma_data_analysis/images/box&cloud.png)
 
-2. single function:(waypoint15,instance0,label10[table],object0)
+2. single&box function:(waypoint15,instance0,label10[table],object0)
 
 (red region represent the region the object has been to)
 
 ![marker](https://raw.githubusercontent.com/duanby/soma/data_analysis/soma_data_analysis/images/single.png)
+
+3. predict function:(waypoint15,instance[0,1,2,3,4,5,6,7])
+
+(red boxes represent table; green boxes represent chair/sofa; other boxes represent tv/monitor)
+
+![marker](https://raw.githubusercontent.com/duanby/soma/data_analysis/soma_data_analysis/images/predict.png)
 
 Run the SOMA region analysis:
 
