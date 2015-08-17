@@ -39,7 +39,7 @@ input:
 
 output:
 
-1. box&cloud function:(waypoint15,instance0,label4[chair])
+1. box&cloud function:(waypoint15,instance0,label10[table])
 
 (yellow part is the acutal cloud)
 
@@ -51,7 +51,7 @@ output:
 
 ![marker](https://raw.githubusercontent.com/duanby/soma/data_analysis/soma_data_analysis/images/single.png)
 
-3. predict function:(waypoint15,instance[0,1,2,3,4,5,6,7])
+3. predict function:(waypoint15,instance[0,1,2,3,4])
 
 (red boxes represent table; green boxes represent chair/sofa; other boxes represent tv/monitor)
 
