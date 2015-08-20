@@ -80,4 +80,22 @@ output:
 
 ![marker](https://raw.githubusercontent.com/duanby/soma/data_analysis/soma_data_analysis/images/roi.png)
 
+Run the SOMA room type analysis:
+
+    ```
+    $ rosrun soma_data_analysis room_type_classifying.py 
+    ```
+input:
+
+1. for operation, input one of the following operations: 
+  * "test"    :  predict a list of instances from a list of waypoints and display the accuracy
+  * "predict" :  predict the room type of a list of query instances and its actual label
+
+2. for request waypoints(especially for "predict" function), input a list of waypoints in the form: ["WayPoint15","WayPoint6"]
+
+3. for request instances(especially for "predict" function), input several list of instances corresponding to the waypoints: [0,1] [1,2,3,4,5]
+
+output:
+from 0 to 4, each number of the output is the index of the types of room:
+[Kitchen, OpenPlan, Office, GroupOffice,MeetingRoom]
 
