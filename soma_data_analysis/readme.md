@@ -99,3 +99,19 @@ output:
 from 0 to 4, each number of the output is the index of the types of room:
 [Kitchen, OpenPlan, Office, GroupOffice,MeetingRoom]
 
+    ```
+    $ rosrun soma_data_analysis room_type_clustering.py 
+    ```
+input:
+
+1. for operation, input one of the following operations: 
+  * "whole"  :  cluster among all the instances of all the waypoints
+  * "aver"   :  cluster among all the waypoints (its feature is the average of feature inside the waypoint)
+  * "expand" :  firstly, cluster inside every waypoint, then treat every centroid as an independent waypoint.      secondly, cluster these new "waypoints" using the method similiar to "aver".
+
+output:
+
+1. for "whole" operation: output is display in the form of [waypoint, instance, index of cluster it belongs to]
+
+2. for other operation: output is display in the form of [waypoint, index of cluster it belongs to]
+
