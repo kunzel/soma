@@ -24,6 +24,7 @@ import roslib; roslib.load_manifest('visualization_marker_tutorials')
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 from geometry_msgs.msg import Point
+from soma_manager.soma_testing import SOMAMnager
 
 
 class identify_objects:
@@ -32,7 +33,7 @@ class identify_objects:
          self.prob=dict()
          self.points=dict()
          self.label=dict()
-         label_names=json.load(open("label_names_large.json","r"))
+         label_names=json.load(open("data/label_names_large.json","r"))
          self.label_names=label_names[waypoint]
          self.objects=dict()
          self.position_matrix=dict()
@@ -42,8 +43,9 @@ class identify_objects:
              print 'for', instance
              self.objects[instance]=dict()
              self.tag[instance]=dict()
-             self.points[instance]=json.load(open(waypoint+str(instance)+"points_large.json","r"))
-             self.prob[instance]=json.load(open(waypoint+str(instance)+"prob_large.json","r"))
+             self.points[instance]=json.load(open('data/'+waypoint+str(instance)+"points_large.json","r"))
+             self.prob[instance]=json.load(open('data/'+waypoint+str(instance)+"prob_large.json","r"))
+
              self.asign_label(waypoint,instance)
              self.position_matrix[instance]=dict()
              for objects in self.label_names[unicode(instance)]:
@@ -122,7 +124,7 @@ class identify_objects:
             for i in range(len(centroids)):
              part_feature=np.array(feature[np.where(idx==i)])
              #print len(part_feature)
-             if len(part_feature)<50:
+             if len(part_feature)<len(feature)/15:
                 #print 'ignore this cluster'
                 self.objects[instance][objects][i]=[]
                 self.tag[instance][objects][i]=-1
@@ -136,8 +138,8 @@ class identify_objects:
                 b=part_feature[min_index[0]]
                 c=part_feature[min_index[1]]
                 for axis in range(3):
-                    maxi[axis]=np.percentile(part_feature[:,axis],80)
-                    mini[axis]=np.percentile(part_feature[:,axis],20) 
+                    maxi[axis]=np.percentile(part_feature[:,axis],90)
+                    mini[axis]=np.percentile(part_feature[:,axis],10) 
                     aver[axis]=np.percentile(part_feature[:,axis],50)  
                 self.objects[instance][objects][i]=[maxi,mini,aver,a,b,c]
                 self.tag[instance][objects][i]=[]
@@ -215,8 +217,11 @@ class identify_objects:
                  publisher.publish(marker)
 
 #general operation to generate the bounding boxes and display them on rviz given the label        
-     def bounding_box(self,waypoint,instance,objects):
+     def bounding_box(self,waypoint,instance,objects,soma_map,soma_conf):
                  self.set_box(waypoint,instance,objects)
+                 store=SOMAMnager(soma_map, soma_conf)
+                 for index,pose in self.position_matrix[instance][objects].items():
+                     store.add_object(objects,pose[2],waypoint)
                  print 'finish generating'
                  try:
                      self.draw(instance,objects)
@@ -250,7 +255,7 @@ class identify_objects:
         table[4][2]=0
         table[5][2]=0
         if tv[1][2]+0.1<table[0][2]:
-            above=0
+            above=0                 store=SOMAMnager(soma_map, soma_conf)
         elif self.pnt2line(tv[2],table[3],table[4])==0:
             above=0
         elif self.pnt2line(tv[2],table[4],table[5])==0:
@@ -308,7 +313,7 @@ class identify_objects:
         return p
 
 #compute the average position and size of one object given a list of instances       
-     def overview(self,waypoint,instances,objects):
+     def overview(self,waypoint,instances,objects,soma_map,soma_conf):
          current=0
          data=[]
          self.predict[objects]=dict()
@@ -333,16 +338,19 @@ class identify_objects:
                          self.predict[objects][current]=np.mean(data,axis=0)
                      current = current + 1
                      print 'a new object'
+         store=SOMAMnager(soma_map, soma_conf)
+         for index,pose in self.predict[objects].items():
+             store.add_object(objects,pose[2],waypoint)
 
 # visualize the prediction                        
-     def preview(self,waypoint,instances):
+     def preview(self,waypoint,instances,soma_map,soma_conf):
         topic='visualization_marker_array'
         publisher=rospy.Publisher(topic,MarkerArray,queue_size=10)
         rospy.init_node('register',anonymous=True)
         markerArray=MarkerArray()
         color=0
         for objects in ["chair/sofa","monitor/tv","table"]:
-            self.overview(waypoint,instances,objects)
+            self.overview(waypoint,instances,objects,soma_map,soma_conf)
             for index, data in self.predict[objects].items():
                    maxi=data[0]
                    mini=data[1]
@@ -373,14 +381,17 @@ class identify_objects:
                 publisher.publish(markerArray)
                 rospy.sleep(0.01)              
 
-#search the objects in instance2 which is considered as the same object as objects[i] in instance1
+#search the objects in instance2 which is c                     store.add_object(objects,pose[2],waypoint)onsidered as the same object as objects[i] in instance1
      def search(self,waypoint,instance1,instance2,objects,i): 
          data1=self.objects[instance1][objects][i]
+         if data1 == []:
+            sys.exit('no such object')
          record=2
          index=100
          for j in self.objects[instance2][objects].keys():
              data2=self.objects[instance2][objects][j]
              if data2 != []:
+                print len(data1),len(data2)
                 if distance.euclidean(data1[2],data2[2])< min([1.5,record]):
                    index=j
                    record=distance.euclidean(data1[2],data2[2])
@@ -462,36 +473,37 @@ class identify_objects:
 
 if __name__ == "__main__":
    label_type=["prop","wall","cabinet","ceiling","chair/sofa", "window", "floor","monitor/tv","person","shelf", "table"]
-   waypoint=unidecode(json.loads(raw_input('request waypoint')))
-   mission=unidecode(json.loads(raw_input('operation')))
-   instances=json.loads(raw_input('request instances'))
-   objects=identify_objects(waypoint,instances)
-   if mission == 'box':
-      num=json.loads(raw_input('request label')) 
-      objects.bounding_box(waypoint,instances[0],label_type[num])
-   elif mission == 'cloud':
-      num=json.loads(raw_input('request label'))
-      objects.actaul_clouds(waypoint,instances[0],label_type[num])
-   elif mission == 'single':
-      num=json.loads(raw_input('request label'))
-      obj=json.loads(raw_input('specific object'))
-      mean,cov=objects.single_object_over_time(waypoint,instances,label_type[num],obj,draw_region=1)
-   elif mission == 'tv_spatial':
-      objects.monitor_spatial(waypoint,instances)
-   elif mission == 'chair_spatial':
-      objects.chair_spatial(waypoint,instances)
-   elif mission == 'predict':
-      objects.preview(waypoint,instances)
-   else :
-      print 'wrong order' 
+   #waypoint=unidecode(json.loads(raw_input('request waypoint')))
+   #mission=unidecode(json.loads(raw_input('operation')))
+   #instances=json.loads(raw_input('request instances'))
+   #objects=identify_objects(waypoint,instances)
+   #if mission == 'box':
+      #num=json.loads(raw_input('request label')) 
+      #objects.bounding_box(waypoint,instances[0],label_type[num])
+   #elif mission == 'cloud':
+      #num=json.loads(raw_input('request label'))
+      #objects.actaul_clouds(waypoint,instances[0],label_type[num])
+   #elif mission == 'single':
+      #num=json.loads(raw_input('request label'))
+      #obj=json.loads(raw_input('specific object'))
+      #mean,cov=objects.single_object_over_time(waypoint,instances,label_type[num],obj,draw_region=1)
+   #elif mission == 'tv_spatial':
+      #objects.monitor_spatial(waypoint,instances)
+   #elif mission == 'chair_spatial':
+      #objects.chair_spatial(waypoint,instances)
+   #elif mission == 'predict':
+      #objects.preview(waypoint,instances)
+   #else :
+      #print 'wrong order' 
    #waypoint="WayPoint42"
    #instances=[0,1,2,3,4]
-   #req=[u"WayPoint15",[0,1,2,3,4]]
-   #objects=identify_objects(unidecode(req[0]),req[1])
+   req=[u"WayPoint15",[0,1,2,3,4]]
+   objects=identify_objects(unidecode(req[0]),req[1])
    #objects.preview(unidecode(req[0]),req[1])
    #print 'finish setting'
-   #mean,cov=objects.single_object_over_time(unidecode(req[0]),req[1],label_type[4],0,draw=0)
+   #mean,cov=objects.single_object_over_time(unidecode(req[0]),req[1],label_type[10],0,draw_region=1)
    #objects.bounding_box(unidecode(req[0]),req[1][0],label_type[10]) 
-   #objects.actaul_clouds(unidecode(req[0]),req[1][0],label_type[4])
+   objects.actaul_clouds(unidecode(req[0]),req[1][0],label_type[1])
    #objects.monitor_spatial(unidecode(req[0]),req[1])
    #objects.chair_spatial(unidecode(req[0]),req[1])
+   #objects.preview(unidecode(req[0]),req[1])
