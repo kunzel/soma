@@ -210,8 +210,9 @@ def scan_txt(input_path):
 if __name__ == '__main__':
 
     ROMBUS_DB = "/Volumes/BIG_ANOKK/strands_data_backup/20150505"
+    HK_DB = "/home/hakan/Data/KTH_longterm_dataset_labels/20140820/patrol_run_2/room_1"
 
-    class_lookup = scan_txt(ROMBUS_DB)
+    class_lookup = scan_txt(HK_DB)
 
     rospy.init_node("data_importer", anonymous=True)
 
@@ -220,7 +221,7 @@ if __name__ == '__main__':
 
     rooms = []
     #
-    scan_dir(ROMBUS_DB, "room.xml", rooms)
+    scan_dir(HK_DB, "room.xml", rooms)
 
     rooms.sort(key=lambda x: x[-1])
 
