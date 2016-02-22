@@ -1,0 +1,21 @@
+{ 
+  "roi": {
+	        "Office" : "",  
+          "Meeting room" : "",        
+          "Resource room" : "", 
+          "Kitchen" : "",              
+          "Library" : "",      
+          "Common room" : "",
+          "Robot lab" : "",
+          "Eating area" : "",
+          "Atrium" : "",
+          "Reception" : "",      
+          "Hallway" : "", 
+          "Administration Room" : "", 
+          "School Service" : "", 
+          "IT Service" : "", 
+          "Downstairs" : "", 
+          "Upstairs" : "", 
+          "Lift" : "" 
+  }
+}
