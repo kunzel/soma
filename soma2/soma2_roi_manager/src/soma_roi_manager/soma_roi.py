@@ -118,10 +118,10 @@ class SOMAROIQuery():
 
 class SOMAROIManager():
 
-    def __init__(self, soma_map, soma_map_name, soma_conf, config_file=None):
+    def __init__(self, soma_conf, config_file=None):
 
-        self.soma_map = soma_map
-        self.soma_map_name = soma_map_name
+        #self.soma_map = soma_map
+        #self.soma_map_name = soma_map_name
         self.map_unique_id = -1
         self.soma_conf = soma_conf
         if config_file:
@@ -129,7 +129,7 @@ class SOMAROIManager():
         else:
             # default file
             rp = RosPack()
-            path = rp.get_path('soma_roi_manager') + '/config/'
+            path = rp.get_path('soma2_roi_manager') + '/config/'
             filename = 'default.json'
             self._config_file=path+filename
         self._soma_obj_ids = dict()
@@ -166,6 +166,7 @@ class SOMAROIManager():
         print "Waiting for the map info from soma2_map_manager"
         try:
             rospy.wait_for_service('soma2/map_info')
+            print "Map info received..."
         except:
            # print("No 'static_map' service")
             return None
@@ -336,7 +337,7 @@ class SOMAROIManager():
 
     def _retrieve_objects(self):
 
-        objs = self._msg_store.query(SOMA2ROIObject._type, message_query={"map_name": self.soma_map,
+        objs = self._msg_store.query(SOMA2ROIObject._type, message_query={"map_name": self.soma_map_name,
                                                                       "config": self.soma_conf})
         #print objs
         max_id = 0
@@ -564,7 +565,7 @@ class SOMAROIManager():
 
         geo_json = {}
         geo_json['soma_roi_id'] = soma_obj.roi_id
-        geo_json['soma_map'] = soma_obj.map
+        geo_json['soma_map_name'] = soma_obj.map_name
         geo_json['soma_config'] = soma_obj.config
         geo_json['type'] = soma_obj.type
 
@@ -802,16 +803,16 @@ if __name__=="__main__":
     # TODO: add list command
     
     parser = argparse.ArgumentParser(prog='soma_roi.py')
-    parser.add_argument("map", nargs=1, help='Path of the used 2D map')
-    parser.add_argument("map_name",nargs=1, help='Name of the used 2D map')
+    #parser.add_argument("map", nargs=1, help='Path of the used 2D map')
+    #parser.add_argument("map_name",nargs=1, help='Name of the used 2D map')
     parser.add_argument("conf", nargs=1, help='Name of the object configuration')
     parser.add_argument('-t', metavar='config-file')
                         
     args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
     
     rospy.init_node("soma2")
-    rospy.loginfo("Running SOMA (map: %s, map_name: %s conf: %s, types: %s)", args.map[0], args.map_name[0], args.conf[0], args.t)
-    SOMAROIManager(args.map[0], args.map_name[0], args.conf[0],args.t)
+    rospy.loginfo("Running SOMA2 (conf: %s, types: %s)", args.conf[0], args.t)
+    SOMAROIManager(args.conf[0],args.t)
     
 
 

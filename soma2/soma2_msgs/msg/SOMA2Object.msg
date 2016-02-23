@@ -1,5 +1,5 @@
 string id 
-string map
+string map_name
 string map_unique_id 
 string config
 string mesh
@@ -14,3 +14,8 @@ int8 logminute
 geometry_msgs/Pose pose
 geometry_msgs/Pose sweepCenter
 sensor_msgs/PointCloud2 cloud
+geometry_msgs/PoseArray posearray
+# geotype: Point,Polygon,etc
+string geotype
+# the poses in geospatial format lat,long
+geometry_msgs/PoseArray geoposearray

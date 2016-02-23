@@ -27,19 +27,19 @@ from soma2_map_manager.srv import *
 
 class SOMA2MapManager():
 
-    def __init__(self, soma_map_name):
+    def __init__(self):
 
-        self.soma_map_name = soma_map_name
+       # self.soma_map_name = soma_map_name
         self.map_unique_id = -1
         self.soma2map = SOMA2OccupancyMap()
         self.pub = rospy.Publisher('soma2/map', OccupancyGrid, queue_size=1)
-        s = rospy.Service('soma2/map_info', MapInfo, self.handle_map_info)
-    
+       
         self._map_store=MessageStoreProxy(database="maps", collection="soma2")
 
-        self._init_map()
-        
-        self.run_node()
+        if(self._init_map()):
+            s = rospy.Service('soma2/map_info', MapInfo, self.handle_map_info)
+            self.run_node()
+        print "Quitting..."
         
         #rospy.spin()
     def handle_map_info(self,req):
@@ -61,14 +61,14 @@ class SOMA2MapManager():
                 if(var.isdigit()):
                   if(int(var) <= len(res)):
                     if(int(var) == 0):
-                        self.listen_and_store_map()
-                        return
+                       return self.listen_and_store_map()
+                        
                 
                     self.soma2map,meta = res[(int(var)-1)]
                     #print meta
                     self.soma2map.map.data = self.rldecode(self.soma2map.rle_values,self.soma2map.rle_counts)
                     self.map_unique_id = meta['_id']
-                    break
+                    return True
             #print self.selected_map.map.data
             #print selected_map.map.data
            
@@ -76,13 +76,15 @@ class SOMA2MapManager():
             
         else:
              print "No maps are found in DB. Listening map_server for a map..."
-             self.listen_and_store_map()
+             if(self.listen_and_store_map()):
+                return True
+             return False
              
     def listen_and_store_map(self):
          occmap = SOMA2OccupancyMap() 
          map = self._get_occupancy_map()
          if map:
-            var = raw_input("Map is received. Please enter a name for storing it in the database:")
+            var = raw_input("Map is received. Please enter a name for storing it in the database: ")
             print "you entered", var
             occmap.map = map.map
             occmap.mapname = var
@@ -92,15 +94,17 @@ class SOMA2MapManager():
             #print values
             #print counts
             occmap.rle_values = values
-            print sum(counts)
+            #print sum(counts)
             occmap.rle_counts = counts
-            print len(occmap.map.data)
+            #print len(occmap.map.data)
             occmap.map.data = []
             _id = self._map_store.insert(occmap)
             self.soma2map = tempmap
             self.map_unique_id = _id
+            return True
          else:
-            print "map_server is not working. SOMA2 Data will be stored without actual map info!! Map unique identifier will be less than 0"
+            print "map_server is not working. Please check map_server node and ensure that it is working"
+            return False
     
     def run_node(self):
            rate = rospy.Rate(10) # 10hz
@@ -166,15 +170,13 @@ class SOMA2MapManager():
 if __name__=="__main__":
 
     # TODO: add list command
-    
-    parser = argparse.ArgumentParser(prog='soma_roi.py')
-    parser.add_argument("map_name",nargs=1, help='Name of the used 2D map')
+ 
 
-    args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
+  
     
-    rospy.init_node("soma2map")
-    rospy.loginfo("Running SOMA2 Map Manager (map: %s)", args.map_name[0])
-    SOMA2MapManager(args.map_name[0])
+    rospy.init_node("soma2_map_manager")
+    rospy.loginfo("Running SOMA2 Map Manager")
+    SOMA2MapManager()
     
 
 
