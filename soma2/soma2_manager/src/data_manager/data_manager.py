@@ -13,14 +13,14 @@ from threading import Timer
 from mongodb_store.message_store import MessageStoreProxy
 from soma2_msgs.msg import SOMA2ROIObject
 
-from soma2_manager.srv import SOMA2InsertObjs
+from soma2_manager.srv import *
 
 
 from soma2_map_manager.srv import *
 
 class SOMA2DataManager():
 
-    def __init__(self, db_name, collection_name):
+    def __init__(self, db_name, collection_name="soma2"):
 
        # self.soma_map_name = soma_map_name
         self._db_name = db_name
@@ -28,7 +28,7 @@ class SOMA2DataManager():
 
         self._message_store = MessageStoreProxy(database=db_name, collection=collection_name)
 
-        s = rospy.Service('soma2/insert_object_request', SOMA2InsertObjs, self.handle_insert_request)
+        s = rospy.Service('soma2/insert_objects', SOMA2InsertObjs, self.handle_insert_request)
 
         rospy.spin()
 
