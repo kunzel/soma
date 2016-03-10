@@ -5,7 +5,6 @@ string map_unique_id
 string config
 string mesh
 string type
-string frame
 string logtime
 string waypoint
 string timestep

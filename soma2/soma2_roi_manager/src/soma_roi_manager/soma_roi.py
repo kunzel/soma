@@ -41,7 +41,7 @@ def r_func(x):
     d =  0.625
 
     x = 1.0 - x
-  
+
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
@@ -50,9 +50,9 @@ def g_func(x):
     b =  0.375
     c =  0.625
     d =  0.875
-    
+
     x = 1.0 - x
-    
+
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
@@ -62,9 +62,9 @@ def b_func(x):
     b =  0.625
     c =  0.875
     d =  1.125
-  
+
     x = 1.0 - x
-  
+
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
@@ -90,8 +90,8 @@ class SOMAROIQuery():
         poly.points = []
         for p in sorted_poses:
             point = Point()
-            point.x = p.position.x 
-            point.y = p.position.y 
+            point.x = p.position.x
+            point.y = p.position.y
             poly.points.append(point)
         return poly
 
@@ -114,7 +114,7 @@ class SOMAROIQuery():
         for o in objs:
             rois.add(o[0].roi_id)
         return rois
-            
+
 
 class SOMAROIManager():
 
@@ -143,25 +143,25 @@ class SOMAROIManager():
         self._interactive = True
 
         self._msg_store=MessageStoreProxy(collection="soma2_roi")
-        
+
         self._gs_store=GeoSpatialStoreProxy(db="geospatial_store", collection="soma")
-        
+
         self._server = InteractiveMarkerServer("soma2_roi")
 
         self._init_types()
-        
+
         resp = self._init_map()
-        print resp
+        #print resp
         self.soma_map_name = resp.map_name
         self.map_unique_id = resp.map_unique_id
         print "Map name: ",self.soma_map_name," Unique ID ",self.map_unique_id
 
         self._init_menu()
-        
+
         self.load_objects()
 
         rospy.spin()
-    
+
     def _init_map(self):
         print "Waiting for the map info from soma2_map_manager"
         try:
@@ -179,15 +179,15 @@ class SOMAROIManager():
            return None
 
     def _init_types(self):
-        # read from config in soma_objects 
-        
+        # read from config in soma_objects
+
         with open(self._config_file) as config_file:
             config = json.load(config_file)
 
             self.mesh = dict()
             for k, v in config['roi'].iteritems():
                 self.mesh[k] = v
-                
+
 
     def _init_menu(self):
 
@@ -203,10 +203,10 @@ class SOMAROIManager():
         for k in sorted(self.mesh.keys()):
             entry =  self.menu_handler.insert(k, parent=add_entry, callback=self._add_cb)
             self.menu_item[entry] = k
-            
+
         del_entry =  self.menu_handler.insert( "Delete ROI", callback=self._del_cb)
 
-        
+
         enable_entry = self.menu_handler.insert( "Movement control", callback=self._enable_cb )
         self.menu_handler.setCheckState( enable_entry, MenuHandler.CHECKED )
 
@@ -221,16 +221,16 @@ class SOMAROIManager():
         rospy.loginfo("Delete ROI: %s", feedback.marker_name)
         roi_and_count = feedback.marker_name.split('_')
         roi = self._soma_obj_roi[roi_and_count[0]]
-        
+
         self.delete_object(roi,feedback.marker_name,True)
-        
+
 
     def _add_point_cb(self, feedback):
         #This is the object that we are pressing (feedback)
         rospy.loginfo("Add point: %s", feedback.marker_name)
         roi_and_count = feedback.marker_name.split('_')
         roi = self._soma_obj_roi[roi_and_count[0]]
-        print "ROI is ", roi
+        #print "ROI is ", roi
         t   = self._soma_obj_type[roi_and_count[0]]
         pose = feedback.pose
         pose.position.x = pose.position.x+0.5
@@ -241,75 +241,75 @@ class SOMAROIManager():
     def _del_point_cb(self, feedback):
         rospy.loginfo("Delete point: %s", feedback.marker_name)
         roi_and_count = feedback.marker_name.split('_')
-        poses = self._soma_obj_pose[roi_and_count[0]] 
-        
+        poses = self._soma_obj_pose[roi_and_count[0]]
+
         markerindex = int(roi_and_count[1])-1
         roi = roi_and_count[0]
-        
+
         marker = self._soma_obj_markers[roi][roi_and_count[1]]
         keys = self._soma_obj_markers[roi].keys();
         ##print len(markers)," hey ",markerindex
-        
+
         #this was the last marker of this roi so we should delete the roi
         if(len(keys)==1):
             self.delete_object(roi,feedback.marker_name,True)
             return
-        #del markers[markerindex] 
-        
+        #del markers[markerindex]
+
         del self._soma_obj_markers[str(roi)][str(roi_and_count[1])]
-        
-        del self._soma_obj_pose[roi_and_count[0]] 
+
+        del self._soma_obj_pose[roi_and_count[0]]
         self._soma_obj_pose[roi_and_count[0]] = list()
-         
+
         #print self._soma_obj_markers[str(roi_and_count[0])]
-        
+
         for key,amarker in self._soma_obj_markers[str(roi_and_count[0])].iteritems():
             self._soma_obj_pose[roi_and_count[0]].append(amarker.pose)
-        
-        
-        
+
+
+
         # Using the del statement
         self.delete_object(roi,feedback.marker_name,False)
-        
-        
+
+
         #self.delete_object(feedback.marker_name)
         #roi = self._soma_obj_roi[feedback.marker_name]
         self.draw_roi(roi)
 
     def _update_poly(self, feedback):
         return
-    
+
     def _update_cb(self, feedback):
         p = feedback.pose.position
        # print "Feedback is ",feedback
         #print "Marker " + feedback.marker_name + " is now at " + str(p.x) + ", " + str(p.y)
         #self._soma_obj_pose[feedback.marker_name] = feedback.pose
         roi_and_count = feedback.marker_name.split('_')
-        
-        del self._soma_obj_pose[roi_and_count[0]] 
+
+        del self._soma_obj_pose[roi_and_count[0]]
         self._soma_obj_pose[roi_and_count[0]] = list()
-         
-        
+
+
         markerindex = int(roi_and_count[1])
-        
+
         self._soma_obj_markers[str(roi_and_count[0])][str(markerindex)].pose = feedback.pose
-        
+
         #print self._soma_obj_markers[str(roi_and_count[0])]
-        
+
         for key,amarker in self._soma_obj_markers[str(roi_and_count[0])].iteritems():
             self._soma_obj_pose[str(roi_and_count[0])].append(amarker.pose)
-        
-        
+
+
         roi = self._soma_obj_roi[roi_and_count[0]]
-        print "ROI is",roi
+        #print "ROI is",roi
         self.draw_roi(roi)
 
         if hasattr(self, "vp_timer_"+feedback.marker_name):
-            getattr(self, "vp_timer_"+feedback.marker_name).cancel()        
+            getattr(self, "vp_timer_"+feedback.marker_name).cancel()
         setattr(self, "vp_timer_"+feedback.marker_name,
                 Timer(3, self.update_object, [feedback]))
-        getattr(self, "vp_timer_"+feedback.marker_name).start()        
-        
+        getattr(self, "vp_timer_"+feedback.marker_name).start()
+
     def _enable_cb(self, feedback):
         handle = feedback.menu_entry_id
         state = self.menu_handler.getCheckState( handle )
@@ -324,9 +324,9 @@ class SOMAROIManager():
         self.menu_handler.reApply( self._server )
 
         self.load_objects()
-        
+
         self._server.applyChanges()
-        
+
     def _next_id(self):
         self._soma_id += 1
         return self._soma_id
@@ -351,12 +351,12 @@ class SOMAROIManager():
         self._soma_roi_id = max_roi_id
 
         return objs
-    
+
     def load_objects(self):
 
         # this is the array for roi ids
         self._soma_obj_roi_ids = dict()
-        
+
         #get objects from db
         objs = self._retrieve_objects()
 
@@ -378,12 +378,12 @@ class SOMAROIManager():
             else:
                 self._soma_obj_roi_ids[o.roi_id] = list()
                 self._soma_obj_roi_ids[o.roi_id].append(o.id)
-                
+
             self._soma_obj_roi[o.id] = o.roi_id
             self._soma_obj_type[o.id] = o.type
             self._soma_obj_pose[o.id] = o.posearray.poses
             self._soma_obj_markers[o.id] = dict()
-            
+
             for pose in o.posearray.poses:
                 self.load_object(o.id, o.roi_id, o.type, pose)
 
@@ -400,10 +400,10 @@ class SOMAROIManager():
             self.undraw_roi(key)
 
     def draw_roi(self, roi):
-        print"ROI IDS ",self._soma_obj_roi_ids
+    #    print"ROI IDS ",self._soma_obj_roi_ids
         roicp = roi
         v = self._soma_obj_roi_ids[str(roicp)]
-        print "V is ",v
+    #    print "V is ",v
         t = self._soma_obj_type[v[0]]
         p = self._soma_obj_pose[v[0]]
         cc = 0
@@ -425,53 +425,53 @@ class SOMAROIManager():
 
         #default marker count value
         markerno = 1
-       
-        #get the max key value 
+
+        #get the max key value
         if self._soma_obj_markers[str(soma_id)].keys():
             maxkey = max(self._soma_obj_markers[str(soma_id)].keys(), key=int)
             markerno = int(maxkey)+1;
-        print "marker no ",markerno
-          
+    #    print "marker no ",markerno
+
        # print self._soma_obj_markers[str(soma_id)]
        # print str(soma_id)
         int_marker = self.create_object_marker(soma_id, roi, soma_type, pose, markerno)
-        
+
         self._soma_obj_markers[str(soma_id)][str(markerno)] = int_marker
-        
+
         #call the update_cb when marker moves
         self._server.insert(int_marker, self._update_cb)
-        
+
         name = soma_id+'_'+str(markerno)
 
         self.menu_handler.apply( self._server, name )
 
         self._server.applyChanges()
-        
+
         #print self._soma_obj_markers[str(soma_id)].keys()
-        
-        
+
+
 
 #soma_type = Office, Kitchen, etc, Pose is position
     def add_object(self, soma_type, pose, roi_id=None):
         # todo: add to mongodb
-        
+
         #create a SOMA2ROI Object
         soma_obj = SOMA2ROIObject()
-        
+
         print roi_id
-        
+
         # a new roi
         if roi_id == None:
-            
+
             #soma_id is an id for the soma object like 1,2,3,4. It updates itself from the db if there are existing objects
             soma_id = self._next_id()
-            
+
             #soma_roi_id is acutally the roi number. Is it 1,2,3,4? Multiple soma objects can have the same roi id
             soma_roi_id = self._next_roi_id()
-            
+
             roi_id = soma_roi_id
             print soma_roi_id
-            
+
             soma_obj.id = str(soma_id)
             soma_obj.roi_id = str(soma_roi_id)
             soma_obj.map_name = str(self.soma_map_name)
@@ -479,7 +479,8 @@ class SOMAROIManager():
             soma_obj.config = str(self.soma_conf)
             soma_obj.type = soma_type
             soma_obj.posearray.poses.append(pose)
-            soma_obj.frame = 'map'
+            soma_obj.header.frame_id = 'map'
+            soma_obj.header.stamp = rospy.get_rostime()
             self._soma_obj_roi_ids[str(soma_roi_id)] = list()
             self._soma_obj_markers[soma_obj.id] = dict()
             #_id = self._msg_store.update_id
@@ -490,15 +491,15 @@ class SOMAROIManager():
             self._soma_obj_roi[soma_obj.id] = roi_id
             self._soma_obj_msg[soma_obj.id] = soma_obj
             self._soma_obj_pose[soma_obj.id] = soma_obj.posearray.poses
-            
+
         else:
             # Get the roi id
             soma_roi_id = roi_id
             #print roi_id," ",self.soma_map," ",self.soma_conf," ",self._soma_obj_ids['1']
-            
+
             #call the object with that id
             res = self._msg_store.query(SOMA2ROIObject._type,message_query={'id':str(roi_id)})
-            
+
             #iterate through the objects. Normally there should be only 1 object returned
             for o,om in res:
                # print o," hi ",om
@@ -506,57 +507,40 @@ class SOMAROIManager():
               #  print "Soma Object: ", soma_obj
             if soma_obj:
                 soma_obj.posearray.poses.append(pose)
-                
+
                 self._soma_obj_pose[soma_obj.id] = soma_obj.posearray.poses
-                
+
                 self.insert_geo_json(soma_obj.roi_id,soma_obj)
-                
+
+                #print soma_obj.geoposearray
+
                 #print soma_obj
                 _id = self._soma_obj_ids[soma_obj.id]
-                _newid =  self._msg_store.update_id(_id,soma_obj)
-               
-                soma_id = soma_obj.id 
-                
-                self._soma_obj_msg[soma_obj.id] = soma_obj
-                
-        #_id = self._msg_store.update_id
-        
-        #self._soma_obj_ids[soma_obj.id] = _id
-        #self._soma_obj_msg[soma_obj.id] = soma_obj
-        #self._soma_obj_roi_ids[soma_obj.roi_id].append(soma_obj.id)
-        #self._soma_obj_roi[soma_obj.id].append(soma_obj.roi_id)
-        
-        
 
-        #for pose in soma_obj.posearray.poses:
+                try:
+                    _newid =  self._msg_store.update_id(_id,soma_obj)
+                    rospy.loginfo("ROI Store: updated roi (%s %s)" % (soma_obj.type, soma_obj.roi_id) )
+                except:
+                    soma_obj.geotype = ''
+                    soma_obj.geoposearray = []
+                    rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (soma_obj.type, soma_obj.roi_id))
+
+
+                soma_id = soma_obj.id
+
+                self._soma_obj_msg[soma_obj.id] = soma_obj
+
+
         self.load_object(str(soma_id), soma_obj.roi_id, soma_type, pose)
 
-        
+
 
     def insert_geo_json(self, soma_roi_id,soma_obj):
-        
-        # geospatial store
-        # delete old message
-##        res = self._gs_store.find_one({'soma_roi_id': soma_roi_id,
-##                                       'soma_map': self.soma_map,
-##                                       'soma_config': self.soma_conf})
-##        if res:
-##            _gs_id = res['_id']
-##            self._gs_store.remove(_gs_id)
-            #rospy.loginfo("GS Store: deleted roi")           
 
-        # add new object to geospatial store
         geo_json = self.geo_json_from_soma_obj(soma_obj)
         if geo_json:
-            try:
-              #  self._gs_store.insert(geo_json)
-                soma_obj.geotype = geo_json['loc']['type']
-                soma_obj.geoposearray = geo_json['loc']['coordinates'] 
-                rospy.loginfo("GS Store: updated roi (%s %s)" % (soma_obj.type, soma_obj.roi_id) )
-            except:
-                soma_obj.geotype = ''
-                soma_obj.geoposearray = []
-                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (soma_obj.type, soma_roi_id))
+            soma_obj.geotype = geo_json['loc']['type']
+            soma_obj.geoposearray = geo_json['loc']['coordinates']
         else:
             soma_obj.geotype = ''
             soma_obj.geoposearray = PoseArray()
@@ -573,7 +557,7 @@ class SOMAROIManager():
         if len(self._soma_obj_pose[soma_obj.roi_id]) < 3:
             rospy.logerr("GS Store: %s %s, less then 3 points => Add more points or delete ROI." % (soma_obj.type, soma_obj.roi_id) )
             return None
-        coordinates = PoseArray()    
+        coordinates = PoseArray()
         for pose in self._soma_obj_pose[soma_obj.roi_id]:
             p = copy.deepcopy(pose)
             res = self._gs_store.coords_to_lnglat(p.position.x, p.position.y)
@@ -582,14 +566,15 @@ class SOMAROIManager():
             coordinates.poses.append(p)
 
         p = copy.deepcopy(self._soma_obj_pose[soma_obj.roi_id][0])
-        
+
         res = self._gs_store.coords_to_lnglat(p.position.x, p.position.y)
         p.position.x = res[0]
         p.position.y = res[1]
         coordinates.poses.append(p)
 
+        #print coordinates
 
-            
+
         geo_json['loc'] = {'type': 'Polygon',
                            'coordinates': coordinates}
         return geo_json
@@ -599,9 +584,14 @@ class SOMAROIManager():
 
         _id = self._soma_obj_ids[soma_id]
         msg = self._soma_obj_msg[soma_id]
-        
+
         if(should_delete_roi):
-            self._msg_store.delete(str(_id))
+            try:
+                self._msg_store.delete(str(_id))
+            except:
+                rospy.logerr("Error deleting ROI %s." % (str(soma_id)) )
+                return
+
             del self._soma_obj_ids[soma_id]
             del self._soma_obj_msg[soma_id]
             markers = self._soma_obj_markers[soma_id]
@@ -613,17 +603,23 @@ class SOMAROIManager():
             del self._soma_obj_pose[soma_id]
             del self._soma_obj_roi_ids[soma_id]
             return
-            
-            
-            
+
+
+
         new_msg = copy.deepcopy(msg)
-        
+
         new_msg.posearray.poses = self._soma_obj_pose[str(soma_id)]
         self.insert_geo_json(soma_id,new_msg)
-        self._msg_store.update_id(_id,new_msg)
-    
+
+
+        try:
+            self._msg_store.update_id(_id,new_msg)
+        except:
+            rospy.logerr("Error deleting Marker %s." % (marker_name) )
+            return
+
     # self._msg_store.delete(str(_id))
-        
+
         self._server.erase(marker_name)
         self._server.applyChanges()
 
@@ -654,8 +650,8 @@ class SOMAROIManager():
 ##                rospy.loginfo("GS Store: updated roi (%s %s)" % (old_msg.type, old_msg.roi_id) )
 ##            except:
 ##                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (old_msg.type, old_msg.roi_id))
-##    
-        
+##
+
     def update_object(self, feedback):
         rospy.loginfo("Updated marker: %s", feedback.marker_name)
         roi_and_count = feedback.marker_name.split('_')
@@ -663,7 +659,7 @@ class SOMAROIManager():
         msg = self._soma_obj_msg[roi_and_count[0]]
 
         new_msg = copy.deepcopy(msg)
-        
+
 ##        for amarker in self._soma_obj_markers[roi_and_count[0]]:
 ##            if amarker.description:
 ##                print "Hello"
@@ -671,14 +667,18 @@ class SOMAROIManager():
         markerindex = int(roi_and_count[1])
         #new_msg.posearray.poses[markerindex] = feedback.pose
         #new_msg.posearray.poses.append(feedback.pose)
-        
+
         new_msg.posearray.poses = self._soma_obj_pose[roi_and_count[0]]
 
         #self._soma_obj_pose[roi_and_count[0]] = new_msg.posearray.poses;
-        
+
         self.insert_geo_json(roi_and_count[0],new_msg)
-        
-        self._msg_store.update_id(_id, new_msg)
+
+        try:
+            self._msg_store.update_id(_id, new_msg)
+            rospy.loginfo("ROI %s updated successfully" %(roi_and_count[0]))
+        except:
+            rospy.logerr("Error updating ROI %s" %(roi_and_count[0]))
 
         # geospatial store
         # delete old message
@@ -688,7 +688,7 @@ class SOMAROIManager():
 ##        if res:
 ##            _gs_id = res['_id']
 ##            self._gs_store.remove(_gs_id)
-##            #rospy.loginfo("GS Store: deleted roi")            
+##            #rospy.loginfo("GS Store: deleted roi")
 ##
 ##        # add new object to geospatial store
 ##        geo_json = self.geo_json_from_soma_obj(new_msg)
@@ -697,7 +697,7 @@ class SOMAROIManager():
 ##                self._gs_store.insert(geo_json)
 ##                rospy.loginfo("GS Store: updated roi (%s %s)" % (new_msg.type, new_msg.roi_id) )
 ##            except:
-##                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (new_msg.type, new_msg.roi_id))  
+##                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (new_msg.type, new_msg.roi_id))
 
     def create_object_marker(self, soma_obj, roi, soma_type, pose,markerno):
         # create an interactive marker for our server
@@ -707,15 +707,15 @@ class SOMAROIManager():
         int_marker.description = soma_type + ' (' + roi +'_'+str(markerno)+  ')'
         int_marker.pose = pose
         int_marker.pose.position.z = 0.01
-        
-        
+
+
         marker = Marker()
         marker.type = Marker.SPHERE
         marker.scale.x = 0.25
         marker.scale.y = 0.25
         marker.scale.z = 0.25
         int_marker.pose.position.z = (marker.scale.z / 2)
-        
+
         random.seed(soma_type)
         val = random.random()
         marker.color.r = r_func(val)
@@ -743,27 +743,27 @@ class SOMAROIManager():
 
         menu_control.interaction_mode = InteractiveMarkerControl.BUTTON
         menu_control.always_visible = True
-        
+
         menu_control.markers.append( marker) #makeBox(int_marker) )
         int_marker.controls.append(menu_control)
 
         return int_marker
-    
+
 # This part draws the line strips between the points
     def create_roi_marker(self, roi, soma_type, pose, points, count):
         #print "POINTS: " + str(points)
         #points are all the points belong to that roi, pose is one of the points
         int_marker = InteractiveMarker()
         int_marker.header.frame_id = "map"
-        int_marker.name = "ROI-" + str(roi) 
+        int_marker.name = "ROI-" + str(roi)
        # print "Marker name: ", int_marker.name
         int_marker.description = str(roi)
         int_marker.pose = pose
-        
+
         marker = Marker()
         marker.type = Marker.LINE_STRIP
         marker.scale.x = 0.1
-        
+
         random.seed(soma_type)
         val = random.random()
         marker.color.r = r_func(val)
@@ -776,43 +776,40 @@ class SOMAROIManager():
         control.markers.append( marker )
 
         int_marker.controls.append(control )
-        
+
         marker.points = []
         for point in points:
             p = Point()
             pose = point#self._soma_obj_pose[point]
-            
-            p.x = pose.position.x - int_marker.pose.position.x  
+
+            p.x = pose.position.x - int_marker.pose.position.x
             p.y = pose.position.y - int_marker.pose.position.y
             marker.points.append(p)
 
         p = Point()
         pose = points[0]
-        p.x = pose.position.x - int_marker.pose.position.x  
+        p.x = pose.position.x - int_marker.pose.position.x
         p.y = pose.position.y - int_marker.pose.position.y
         marker.points.append(p)
 
         return int_marker
 
 
-    
-        
+
+
 
 if __name__=="__main__":
 
     # TODO: add list command
-    
+
     parser = argparse.ArgumentParser(prog='soma_roi.py')
     #parser.add_argument("map", nargs=1, help='Path of the used 2D map')
     #parser.add_argument("map_name",nargs=1, help='Name of the used 2D map')
     parser.add_argument("conf", nargs=1, help='Name of the object configuration')
     parser.add_argument('-t', metavar='config-file')
-                        
+
     args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
-    
+
     rospy.init_node("soma2")
     rospy.loginfo("Running SOMA2 (conf: %s, types: %s)", args.conf[0], args.t)
     SOMAROIManager(args.conf[0],args.t)
-    
-
-
