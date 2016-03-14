@@ -25,7 +25,7 @@ from soma2_map_manager.srv import *
 
 class SOMA2DataManager():
 
-    def __init__(self, db_name, collection_name="soma2"):
+    def __init__(self, db_name="soma2data", collection_name="soma2"):
 
        # self.soma_map_name = soma_map_name
         self._db_name = db_name
@@ -83,11 +83,15 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(prog='data_manager.py')
 #parser.add_argument("map", nargs=1, help='Path of the used 2D map')
 #parser.add_argument("map_name",nargs=1, help='Name of the used 2D map')
-    parser.add_argument("db_name", nargs=1, help='Name of the database')
-    parser.add_argument('collection_name', nargs=1, help='Name of the collection')
+    parser.add_argument("db_name", nargs='?', help='Name of the database')
+    parser.add_argument('collection_name', nargs='?', help='Name of the collection')
 
     args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
 
     rospy.init_node("soma2_data_manager")
-    rospy.loginfo("Running SOMA2 data manager (dbname: %s, collection_name: %s)", args.db_name[0], args.collection_name[0])
-    SOMA2DataManager(args.db_name[0],args.collection_name[0])
+    if args.db_name is not None:
+        rospy.loginfo("Running SOMA2 data manager (dbname: %s, collection_name: %s)", args.db_name[0], args.collection_name[0])
+        SOMA2DataManager(args.db_name[0],args.collection_name[0])
+    else:
+        rospy.loginfo("Running SOMA2 data manager (dbname: soma2data, collection_name: soma2)")
+        SOMA2DataManager()
