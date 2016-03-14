@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest("soma_roi_manager")
+import roslib; roslib.load_manifest("soma2_roi_manager")
 import rospy
 from rospkg import RosPack
 import json
@@ -68,55 +68,7 @@ def b_func(x):
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
-class SOMAROIQuery():
-
-    def __init__(self, soma_map, soma_conf):
-        self.soma_map = soma_map
-        self.soma_conf = soma_conf
-        self._msg_store=MessageStoreProxy(collection="soma2_roi")
-
-    def get_polygon(self, roi_id):
-        objs = self._msg_store.query(SOMAROIObject._type, message_query={"map": self.soma_map,
-                                                                         "config": self.soma_conf,
-                                                                         "roi_id": roi_id})
-        ids = []
-        poses = []
-        for o,om in objs:
-            ids.append(o.id)
-            poses.append(o.pose)
-
-        sorted_poses = [_pose for (_id,_pose) in sorted(zip(ids, poses))]
-        poly = Polygon()
-        poly.points = []
-        for p in sorted_poses:
-            point = Point()
-            point.x = p.position.x
-            point.y = p.position.y
-            poly.points.append(point)
-        return poly
-
-    def get_rois(self, roi_type=None):
-        """
-        Returns a set of roi IDs of the given type. If type not specified,
-        returns all rois in this map/configuration.
-        """
-        if roi_type is not None:
-            objs = self._msg_store.query(SOMAROIObject._type,
-                                         message_query={"map": self.soma_map,
-                                                        "config": self.soma_conf,
-                                                        "type": roi_type})
-        else:
-            objs = self._msg_store.query(SOMAROIObject._type,
-                                         message_query={"map": self.soma_map,
-                                                        "config": self.soma_conf} )
-        #TODO: here it would be nice to be able to use mongodb distinct function
-        rois=set()
-        for o in objs:
-            rois.add(o[0].roi_id)
-        return rois
-
-
-class SOMAROIManager():
+class SOMA2ROIManager():
 
     def __init__(self, soma_conf, config_file=None):
 
@@ -188,7 +140,7 @@ class SOMAROIManager():
             for k, v in config['roi'].iteritems():
                 self.mesh[k] = v
 
-
+    ## Initialize the right-click menu
     def _init_menu(self):
 
         self.menu_handler = MenuHandler()
@@ -210,6 +162,7 @@ class SOMAROIManager():
         enable_entry = self.menu_handler.insert( "Movement control", callback=self._enable_cb )
         self.menu_handler.setCheckState( enable_entry, MenuHandler.CHECKED )
 
+    # Add a roi callback
     def _add_cb(self, feedback):
         rospy.loginfo("Add ROI: %s", self.menu_item[feedback.menu_entry_id])
         pose = feedback.pose
@@ -217,6 +170,7 @@ class SOMAROIManager():
         pose.position.y = pose.position.y+0.5
         self.add_object(self.menu_item[feedback.menu_entry_id], pose)
 
+    # Delete a roi callback
     def _del_cb(self, feedback):
         rospy.loginfo("Delete ROI: %s", feedback.marker_name)
         roi_and_count = feedback.marker_name.split('_')
@@ -224,23 +178,37 @@ class SOMAROIManager():
 
         self.delete_object(roi,feedback.marker_name,True)
 
-
+    # Add a point
     def _add_point_cb(self, feedback):
-        #This is the object that we are pressing (feedback)
+
+        #This is the object that we are pressing (feedback) so
+        #that we can get the marker name etc..
         rospy.loginfo("Add point: %s", feedback.marker_name)
         roi_and_count = feedback.marker_name.split('_')
+        #This is the roi that we are adding the point to
         roi = self._soma_obj_roi[roi_and_count[0]]
         #print "ROI is ", roi
+        # This is the type of the roi (Office, Library, etc..)
         t   = self._soma_obj_type[roi_and_count[0]]
+
+        # Get the pose and create the new object a little away
         pose = feedback.pose
         pose.position.x = pose.position.x+0.5
         pose.position.y = pose.position.y+0.5
+        ######################################################
+
+        # Add object
         self.add_object(t, pose, roi)
+
+        # Draw the ROI
         self.draw_roi(roi)
 
     def _del_point_cb(self, feedback):
+
         rospy.loginfo("Delete point: %s", feedback.marker_name)
+
         roi_and_count = feedback.marker_name.split('_')
+
         poses = self._soma_obj_pose[roi_and_count[0]]
 
         markerindex = int(roi_and_count[1])-1
@@ -254,7 +222,7 @@ class SOMAROIManager():
         if(len(keys)==1):
             self.delete_object(roi,feedback.marker_name,True)
             return
-        #del markers[markerindex]
+
 
         del self._soma_obj_markers[str(roi)][str(roi_and_count[1])]
 
@@ -335,6 +303,7 @@ class SOMAROIManager():
         self._soma_roi_id += 1
         return self._soma_roi_id
 
+    #retrieve the objects from DB
     def _retrieve_objects(self):
 
         objs = self._msg_store.query(SOMA2ROIObject._type, message_query={"map_name": self.soma_map_name,
@@ -680,24 +649,7 @@ class SOMAROIManager():
         except:
             rospy.logerr("Error updating ROI %s" %(roi_and_count[0]))
 
-        # geospatial store
-        # delete old message
-##        res = self._gs_store.find_one({'soma_roi_id': new_msg.roi_id,
-##                                       'soma_map': self.soma_map,
-##                                       'soma_config': self.soma_conf})
-##        if res:
-##            _gs_id = res['_id']
-##            self._gs_store.remove(_gs_id)
-##            #rospy.loginfo("GS Store: deleted roi")
-##
-##        # add new object to geospatial store
-##        geo_json = self.geo_json_from_soma_obj(new_msg)
-##        if geo_json:
-##            try:
-##                self._gs_store.insert(geo_json)
-##                rospy.loginfo("GS Store: updated roi (%s %s)" % (new_msg.type, new_msg.roi_id) )
-##            except:
-##                rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (new_msg.type, new_msg.roi_id))
+
 
     def create_object_marker(self, soma_obj, roi, soma_type, pose,markerno):
         # create an interactive marker for our server
@@ -749,7 +701,7 @@ class SOMAROIManager():
 
         return int_marker
 
-# This part draws the line strips between the points
+    # This part draws the line strips between the points
     def create_roi_marker(self, roi, soma_type, pose, points, count):
         #print "POINTS: " + str(points)
         #points are all the points belong to that roi, pose is one of the points
@@ -812,4 +764,4 @@ if __name__=="__main__":
 
     rospy.init_node("soma2")
     rospy.loginfo("Running SOMA2 (conf: %s, types: %s)", args.conf[0], args.t)
-    SOMAROIManager(args.conf[0],args.t)
+    SOMA2ROIManager(args.conf[0],args.t)

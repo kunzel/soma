@@ -8,7 +8,12 @@ import argparse
 import random
 import copy
 import sys
+import datetime
+import time
+import math
 
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import PoseArray
 from threading import Timer
 from mongodb_store.message_store import MessageStoreProxy
 from soma2_msgs.msg import SOMA2ROIObject
@@ -35,13 +40,40 @@ class SOMA2DataManager():
     def handle_insert_request(self,req):
 
         for obj in req.objects:
-            try:
+
+          if(obj.logtimestamp == 0):
+            obj.logtimestamp = rospy.Time.now().secs
+
+          d = datetime.datetime.utcfromtimestamp(obj.logtimestamp)
+          obj.loghour = d.hour
+          obj.logminute = d.minute
+          obj.logday = d.isoweekday()
+          obj.logtimeminutes = obj.loghour*60 + obj.logminute
+
+          if (obj.header.frame_id == ""):
+              obj.header.frame_id = "/map"
+
+          res = self.coords_to_lnglat(obj.pose.position.x,obj.pose.position.y)
+
+          geopose = Pose()
+
+          geopose.position.x = res[0]
+          geopose.position.y = res[1]
+
+          obj.geoposearray.poses.append(geopose)
+
+          try:
                 _id = self._message_store.insert(obj)
-            except:
+          except:
                 return SOMA2InsertObjsResponse(False)
 
         return SOMA2InsertObjsResponse(True)
 
+    def coords_to_lnglat(self, x, y):
+        earth_radius = 6371000.0 # in meters
+        lng = 90 - math.degrees(math.acos(float(x) / earth_radius))
+        lat = 90 - math.degrees(math.acos(float(y) / earth_radius))
+        return [lng , lat]
 
 
 

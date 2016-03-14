@@ -5,12 +5,12 @@ string map_unique_id
 string config
 string mesh
 string type
-string logtime
 string waypoint
 string timestep
 int8 logday
 int8 loghour
 int8 logminute
+uint32 logtimestamp
 geometry_msgs/Pose pose
 geometry_msgs/Pose sweepCenter
 sensor_msgs/PointCloud2 cloud
