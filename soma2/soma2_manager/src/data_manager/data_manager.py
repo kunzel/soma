@@ -20,6 +20,8 @@ from soma2_msgs.msg import SOMA2ROIObject
 
 from soma2_manager.srv import *
 
+from soma2_map_manager.srv import *
+
 
 from soma2_map_manager.srv import *
 
@@ -31,12 +33,37 @@ class SOMA2DataManager():
         self._db_name = db_name
         self._collection_name = collection_name
 
+        # Get the map information from soma2 map_manager
+        resp = self._init_map()
+        #print resp
+        self.soma_map_name = resp.map_name
+        self.map_unique_id = resp.map_unique_id
+        print "Map name: ",self.soma_map_name," Unique ID ",self.map_unique_id
+
         self._message_store = MessageStoreProxy(database=db_name, collection=collection_name)
 
         s = rospy.Service('soma2/insert_objects', SOMA2InsertObjs, self.handle_insert_request)
 
         rospy.spin()
 
+    # Listens the map information from soma2 map_manager
+    def _init_map(self):
+        print "Waiting for the map info from soma2_map_manager"
+        try:
+            rospy.wait_for_service('soma2/map_info')
+            print "Map info received..."
+        except:
+           # print("No 'static_map' service")
+            return None
+        try:
+           map_info = rospy.ServiceProxy('soma2/map_info',MapInfo)
+           resp1 = map_info(0)
+           return resp1
+        except rospy.ServiceException, e:
+           print "Service call failed: %s"%e
+           return None
+
+    # Handles the soma2 objects to be inserted
     def handle_insert_request(self,req):
 
         for obj in req.objects:
@@ -52,6 +79,16 @@ class SOMA2DataManager():
 
           if (obj.header.frame_id == ""):
               obj.header.frame_id = "/map"
+
+          if(obj.cloud.header.frame_id == ""):
+              obj.cloud.header.frame_id = "/map"
+
+          obj.map_name = self.soma_map_name
+          obj.map_unique_id = self.map_unique_id
+
+          # SOMA2 Objects are represented as a 3D point in the world so this could be set here as point
+          obj.geotype = "Point"
+
 
           res = self.coords_to_lnglat(obj.pose.position.x,obj.pose.position.y)
 
