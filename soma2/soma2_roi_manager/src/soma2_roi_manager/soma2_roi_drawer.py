@@ -36,7 +36,7 @@ def r_func(x):
     d =  0.625
 
     x = 1.0 - x
-  
+
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
@@ -45,9 +45,9 @@ def g_func(x):
     b =  0.375
     c =  0.625
     d =  0.875
-    
+
     x = 1.0 - x
-    
+
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
@@ -57,59 +57,14 @@ def b_func(x):
     b =  0.625
     c =  0.875
     d =  1.125
-  
+
     x = 1.0 - x
-  
+
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
-class SOMAROIQuery():
 
-    def __init__(self, soma_map, soma_conf):
-        self.soma_map = soma_map
-        self.soma_conf = soma_conf
-        self._msg_store=MessageStoreProxy(collection="soma2_roi")
 
-    def get_polygon(self, roi_id):
-        objs = self._msg_store.query(SOMAROIObject._type, message_query={"map": self.soma_map,
-                                                                         "config": self.soma_conf,
-                                                                         "roi_id": roi_id})
-        ids = []
-        poses = []
-        for o,om in objs:
-            ids.append(o.id)
-            poses.append(o.pose)
-
-        sorted_poses = [_pose for (_id,_pose) in sorted(zip(ids, poses))]
-        poly = Polygon()
-        poly.points = []
-        for p in sorted_poses:
-            point = Point()
-            point.x = p.position.x 
-            point.y = p.position.y 
-            poly.points.append(point)
-        return poly
-
-    def get_rois(self, roi_type=None):
-        """
-        Returns a set of roi IDs of the given type. If type not specified,
-        returns all rois in this map/configuration.
-        """
-        if roi_type is not None:
-            objs = self._msg_store.query(SOMAROIObject._type,
-                                         message_query={"map": self.soma_map,
-                                                        "config": self.soma_conf,
-                                                        "type": roi_type})
-        else:
-            objs = self._msg_store.query(SOMAROIObject._type,
-                                         message_query={"map": self.soma_map,
-                                                        "config": self.soma_conf} )
-        #TODO: here it would be nice to be able to use mongodb distinct function
-        rois=set()
-        for o in objs:
-            rois.add(o[0].roi_id)
-        return rois
-            
 
 class SOMA2ROIDrawer():
 
@@ -117,22 +72,22 @@ class SOMA2ROIDrawer():
 
         #self.soma_map = soma_map
         #self.soma_map_name = soma_map_name
-       
+
             # default file
         rp = RosPack()
-   
+
 
        # self._interactive = True
 
-        self._msg_store=MessageStoreProxy(collection="soma2_roi")
-        
+        self._msg_store=MessageStoreProxy(database="soma2data",collection="soma2_roi")
+
         s = rospy.Service('soma2/draw_roi', DrawROI, self.handle_draw_roi)
-        
+
        # Publisher vis_pub = node_handle.advertise<visualization_msgs::Marker>( "visualization_marker", 0 );
         self.markerpub = rospy.Publisher("visualization_marker_array", MarkerArray, queue_size=1)
-        
+
         rospy.spin()
-    
+
     def handle_draw_roi(self,req):
        self._delete_markers()
        if(req.roi_id >=0):
@@ -148,9 +103,9 @@ class SOMA2ROIDrawer():
         markerarray = MarkerArray()
         markerarray.markers.append(marker)
         self.markerpub.publish(markerarray)
-   
-        
-  
+
+
+
     def _retrieve_objects(self, map_name, roi_id):
 
         objs = self._msg_store.query(SOMA2ROIObject._type, message_query={"map_name": map_name,
@@ -167,14 +122,14 @@ class SOMA2ROIDrawer():
         self._soma_roi_id = max_roi_id
 
         return objs
-    
+
     def load_objects(self, map_name, roi_id):
 
         # this is the array for roi ids
         self._soma_obj_roi_ids = dict()
-        
+
         markerarray = MarkerArray()
-        
+
         #get objects from db
         objs = self._retrieve_objects(map_name,roi_id)
 
@@ -206,7 +161,7 @@ class SOMA2ROIDrawer():
 
     def draw_roi(self, roi,poses,markerarray,ccstart):
         roicp = roi
-        
+
         p = poses
         cc = ccstart
       #  print "t is ",t," p is ", p
@@ -221,39 +176,39 @@ class SOMA2ROIDrawer():
         self._server.applyChanges()
 
     def load_object(self, soma_id, roi, soma_type, pose,markerno, markerarray):
-          
+
        # print self._soma_obj_markers[str(soma_id)]
        # print str(soma_id)
         int_marker = self.create_object_marker(soma_id, roi, soma_type, pose, markerno)
-        
+
         markerarray.markers.append(int_marker)
         #self.markerpub.publish(int_marker)
-        
+
         #print self._soma_obj_markers[str(soma_id)].keys()
-        
-        
+
+
 
 #soma_type = Office, Kitchen, etc, Pose is position
     def add_object(self, soma_type, pose, roi_id=None):
         # todo: add to mongodb
-        
+
         #create a SOMA2ROI Object
         soma_obj = SOMA2ROIObject()
-        
+
        # print roi_id
-        
+
         # a new roi
         if roi_id == None:
-            
+
             #soma_id is an id for the soma object like 1,2,3,4. It updates itself from the db if there are existing objects
             soma_id = self._next_id()
-            
+
             #soma_roi_id is acutally the roi number. Is it 1,2,3,4? Multiple soma objects can have the same roi id
             soma_roi_id = self._next_roi_id()
-            
+
             roi_id = soma_roi_id
            # print soma_roi_id
-            
+
             soma_obj.id = str(soma_id)
             soma_obj.roi_id = str(soma_roi_id)
             soma_obj.map_name = str(self.soma_map_name)
@@ -272,15 +227,15 @@ class SOMA2ROIDrawer():
             self._soma_obj_roi[soma_obj.id] = roi_id
             self._soma_obj_msg[soma_obj.id] = soma_obj
             self._soma_obj_pose[soma_obj.id] = soma_obj.posearray.poses
-            
+
         else:
             # Get the roi id
             soma_roi_id = roi_id
             #print roi_id," ",self.soma_map," ",self.soma_conf," ",self._soma_obj_ids['1']
-            
+
             #call the object with that id
             res = self._msg_store.query(SOMA2ROIObject._type,message_query={'id':str(roi_id)})
-            
+
             #iterate through the objects. Normally there should be only 1 object returned
             for o,om in res:
                # print o," hi ",om
@@ -288,32 +243,32 @@ class SOMA2ROIDrawer():
               #  print "Soma Object: ", soma_obj
             if soma_obj:
                 soma_obj.posearray.poses.append(pose)
-                
+
                 self._soma_obj_pose[soma_obj.id] = soma_obj.posearray.poses
-                
+
                 self.insert_geo_json(soma_obj.roi_id,soma_obj)
-                
+
                 #print soma_obj
                 _id = self._soma_obj_ids[soma_obj.id]
                 _newid =  self._msg_store.update_id(_id,soma_obj)
-               
-                soma_id = soma_obj.id 
-                
+
+                soma_id = soma_obj.id
+
                 self._soma_obj_msg[soma_obj.id] = soma_obj
-                
+
         #_id = self._msg_store.update_id
-        
+
         #self._soma_obj_ids[soma_obj.id] = _id
         #self._soma_obj_msg[soma_obj.id] = soma_obj
         #self._soma_obj_roi_ids[soma_obj.roi_id].append(soma_obj.id)
         #self._soma_obj_roi[soma_obj.id].append(soma_obj.roi_id)
-        
-        
+
+
 
         #for pose in soma_obj.posearray.poses:
         self.load_object(str(soma_id), soma_obj.roi_id, soma_type, pose)
 
-        
+
 
     def create_object_marker(self, soma_obj, roi, soma_type, pose,markerno):
         # create an interactive marker for our server
@@ -325,8 +280,8 @@ class SOMA2ROIDrawer():
         marker.id = markerno;
        # print marker.pose
         marker.pose.position.z = 0.01
-        
-        
+
+
         #marker = Marker()
         marker.type = Marker.SPHERE
         marker.action = 0
@@ -334,7 +289,7 @@ class SOMA2ROIDrawer():
         marker.scale.y = 0.25
         marker.scale.z = 0.25
         marker.pose.position.z = (marker.scale.z / 2)
-        
+
         random.seed(soma_type)
         val = random.random()
         marker.color.r = r_func(val)
@@ -344,57 +299,54 @@ class SOMA2ROIDrawer():
         #marker.pose = pose
 
         return marker
-    
+
 # This part draws the line strips between the points
     def create_roi_marker(self, roi, pose, points, count):
         #print "POINTS: " + str(points)
         #points are all the points belong to that roi, pose is one of the points
         marker = Marker()
-        
+
        # print "Marker name: ", int_marker.name
-    
+
         marker.pose = pose
         marker.header.frame_id = "map"
         marker.type = Marker.LINE_STRIP
         marker.scale.x = 0.1
         marker.id= count
-        
+
         random.seed(str(count))
         val = random.random()
         marker.color.r = r_func(val)
         marker.color.g = g_func(val)
         marker.color.b = b_func(val)
         marker.color.a = 1.0
-        
+
         marker.points = []
         for point in points:
             p = Point()
             pose = point#self._soma_obj_pose[point]
-            
-            p.x = pose.position.x - marker.pose.position.x  
+
+            p.x = pose.position.x - marker.pose.position.x
             p.y = pose.position.y - marker.pose.position.y
             marker.points.append(p)
 
         p = Point()
         pose = points[0]
-        p.x = pose.position.x - marker.pose.position.x  
+        p.x = pose.position.x - marker.pose.position.x
         p.y = pose.position.y - marker.pose.position.y
         marker.points.append(p)
 
         return marker
 
 
-    
-        
+
+
 
 if __name__=="__main__":
 
     # TODO: add list command
-    
-    
+
+
     rospy.init_node("soma2roidrawer")
     rospy.loginfo("Running SOMA2 ROI Drawer")
     SOMA2ROIDrawer()
-    
-
-
