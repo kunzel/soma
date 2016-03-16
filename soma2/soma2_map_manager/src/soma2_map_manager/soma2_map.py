@@ -32,6 +32,7 @@ class SOMA2MapManager():
        # self.soma_map_name = soma_map_name
         self.map_unique_id = -1
         self.soma2map = SOMA2OccupancyMap()
+        rospy.init_node('soma2_map_manager')
         self.pub = rospy.Publisher('soma2/map', OccupancyGrid, queue_size=1)
        
         self._map_store=MessageStoreProxy(database="maps", collection="soma2")
@@ -151,12 +152,12 @@ class SOMA2MapManager():
             
     def _get_occupancy_map(self):
         try:
-            rospy.wait_for_service('static_map')
+            rospy.wait_for_service('/static_map')
         except:
-           # print("No 'static_map' service")
+            print("No 'static_map' service")
             return None
         try:
-           static_map = rospy.ServiceProxy('static_map',GetMap)
+           static_map = rospy.ServiceProxy('/static_map',GetMap)
            resp1 = static_map()
            return resp1
         except rospy.ServiceException, e:

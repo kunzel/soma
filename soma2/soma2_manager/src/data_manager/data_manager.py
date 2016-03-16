@@ -127,8 +127,12 @@ if __name__=="__main__":
 
     rospy.init_node("soma2_data_manager")
     if args.db_name is not None:
-        rospy.loginfo("Running SOMA2 data manager (dbname: %s, collection_name: %s)", args.db_name[0], args.collection_name[0])
-        SOMA2DataManager(args.db_name[0],args.collection_name[0])
+	if args.collection_name is not None:
+           rospy.loginfo("Running SOMA2 data manager (dbname: %s, collection_name: %s)", args.db_name, args.collection_name)
+           SOMA2DataManager(args.db_name,args.collection_name)
+	else:
+	   rospy.loginfo("Running SOMA2 data manager (dbname: %s, collection_name: soma2)", args.db_name)
+           SOMA2DataManager(args.db_name)
     else:
         rospy.loginfo("Running SOMA2 data manager (dbname: soma2data, collection_name: soma2)")
         SOMA2DataManager()
