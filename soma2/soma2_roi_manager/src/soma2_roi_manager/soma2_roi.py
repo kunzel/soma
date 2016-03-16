@@ -8,6 +8,7 @@ import argparse
 import random
 import copy
 import sys
+import math
 
 from threading import Timer
 
@@ -32,6 +33,12 @@ from bson.objectid import ObjectId
 def trapezoidal_shaped_func(a, b, c, d, x):
     min_val = min(min((x - a)/(b - a), float(1.0)), (d - x)/(d - c))
     return max(min_val, float(0.0))
+
+def coords_to_lnglat(x, y):
+        earth_radius = 6371000.0 # in meters
+        lng = 90 - math.degrees(math.acos(float(x) / earth_radius))
+        lat = 90 - math.degrees(math.acos(float(y) / earth_radius))
+        return [lng , lat]
 
 
 def r_func(x):
@@ -94,9 +101,9 @@ class SOMA2ROIManager():
 
         self._interactive = True
 
-        self._msg_store=MessageStoreProxy(collection="soma2_roi")
+        self._msg_store=MessageStoreProxy(database="soma2data", collection="soma2_roi")
 
-        self._gs_store=GeoSpatialStoreProxy(db="geospatial_store", collection="soma")
+    #    self._gs_store=GeoSpatialStoreProxy(db="geospatial_store", collection="soma")
 
         self._server = InteractiveMarkerServer("soma2_roi")
 
@@ -529,14 +536,14 @@ class SOMA2ROIManager():
         coordinates = PoseArray()
         for pose in self._soma_obj_pose[soma_obj.roi_id]:
             p = copy.deepcopy(pose)
-            res = self._gs_store.coords_to_lnglat(p.position.x, p.position.y)
+            res = coords_to_lnglat(p.position.x, p.position.y)
             p.position.x = res[0]
             p.position.y = res[1]
             coordinates.poses.append(p)
 
         p = copy.deepcopy(self._soma_obj_pose[soma_obj.roi_id][0])
 
-        res = self._gs_store.coords_to_lnglat(p.position.x, p.position.y)
+        res = coords_to_lnglat(p.position.x, p.position.y)
         p.position.x = res[0]
         p.position.y = res[1]
         coordinates.poses.append(p)
