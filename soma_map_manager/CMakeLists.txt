@@ -1,19 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(soma_roi_manager)
+project(soma_map_manager)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
-  interactive_markers
   mongodb_store
   rospy
   soma2_msgs
   visualization_msgs
-  nav_msgs
-  std_msgs
   message_generation
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,7 +57,7 @@ catkin_python_setup()
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
-   DrawROI.srv
+   MapInfo.srv
 #   Service2.srv
  )
 
