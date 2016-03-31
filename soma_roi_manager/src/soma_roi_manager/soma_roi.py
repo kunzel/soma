@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest("soma2_roi_manager")
+import roslib; roslib.load_manifest("soma_roi_manager")
 import rospy
 from rospkg import RosPack
 import json
@@ -24,7 +24,7 @@ from geometry_msgs.msg import PoseArray
 from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
 
-from soma2_map_manager.srv import *
+from soma_map_manager.srv import *
 
 from soma2_msgs.msg import SOMA2ROIObject
 from soma2_msgs.msg import SOMA2OccupancyMap
@@ -75,7 +75,7 @@ def b_func(x):
     value = trapezoidal_shaped_func(a,b,c,d,x)
     return value
 
-class SOMA2ROIManager():
+class SOMAROIManager():
 
     def __init__(self, soma_conf, config_file=None):
 
@@ -88,7 +88,7 @@ class SOMA2ROIManager():
         else:
             # default file
             rp = RosPack()
-            path = rp.get_path('soma2_roi_manager') + '/config/'
+            path = rp.get_path('soma_roi_manager') + '/config/'
             filename = 'default.json'
             self._config_file=path+filename
         self._soma_obj_ids = dict()
@@ -746,6 +746,6 @@ if __name__=="__main__":
 
     args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
 
-    rospy.init_node("soma2")
-    rospy.loginfo("Running SOMA2 (conf: %s, types: %s)", args.conf[0], args.t)
-    SOMA2ROIManager(args.conf[0],args.t)
+    rospy.init_node("soma_roi")
+    rospy.loginfo("Running SOMA ROI (conf: %s, types: %s)", args.conf[0], args.t)
+    SOMAROIManager(args.conf[0],args.t)
