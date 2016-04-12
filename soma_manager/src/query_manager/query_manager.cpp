@@ -2,6 +2,7 @@
 #include <mongodb_store/message_store.h>
 #include "querybuilder.h"
 #include <soma_manager/SOMA2QueryObjs.h>
+#include <soma_map_manager/MapInfo.h>
 #include <QCollator>
 #include <QDir>
 #include <QTextStream>
@@ -518,6 +519,19 @@ int main(int argc, char **argv){
         }
 
     }
+
+    ros::ServiceClient client = n.serviceClient<soma_map_manager::MapInfo>("soma2/map_info");
+
+    ROS_INFO("Waiting for SOMA Map Service...");
+
+    while(!client.exists());
+
+    soma_map_manager::MapInfo srv;
+
+    client.call(srv);
+    ROS_INFO("Received map info. Map Name: %s, Map Unique ID: %s",srv.response.map_name.data(),srv.response.map_unique_id.data());
+
+    map_name = srv.response.map_name;
 
     ros::ServiceServer service = n.advertiseService("soma2/query_db", handleQueryRequests);
     ROS_INFO("SOMA2 Query Service Ready.");
