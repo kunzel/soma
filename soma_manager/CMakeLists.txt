@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   std_msgs
 )
-
+find_package(Qt5Core)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -62,6 +62,7 @@ add_service_files(
   SOMA2InsertObjs.srv
   SOMA2DeleteObjs.srv
   SOMA2UpdateObject.srv
+  SOMA2QueryObjs.srv
 #   Service2.srv
 )
 
@@ -91,9 +92,9 @@ add_service_files(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+   INCLUDE_DIRS src/query_manager/
 #  LIBRARIES soma_manager
-#  CATKIN_DEPENDS interactive_markers mongodb_store rospy soma_msgs visualization_msgs
+  CATKIN_DEPENDS interactive_markers mongodb_store rospy roscpp soma2_msgs visualization_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -106,7 +107,15 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  src/query_manager/
 )
+
+add_custom_target(SOURCES "src/query_manager/query_manager.cpp")
+
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# Add compiler flags for building executables (-fPIE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 ## Declare a cpp library
 # add_library(soma_manager
@@ -114,16 +123,16 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-# add_executable(soma_manager_node src/soma_manager_node.cpp)
+ add_executable(soma_query_manager_node  src/query_manager/query_manager.cpp   src/query_manager/querybuilder.h  src/query_manager/querybuilder.cpp)
+
+ qt5_use_modules(soma_query_manager_node Core)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(soma_manager_node soma_manager_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(soma_manager_node
-#   ${catkin_LIBRARIES}
-# )
+ target_link_libraries(soma_query_manager_node ${catkin_LIBRARIES} )
 
 #############
 ## Install ##
