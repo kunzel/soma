@@ -318,7 +318,7 @@ class SOMAROIDrawer():
         marker.scale.x = 0.1
         marker.id= count
 
-        random.seed(str(count))
+        random.seed(10)
         val = random.random()
         marker.color.r = r_func(val)
         marker.color.g = g_func(val)

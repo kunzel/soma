@@ -435,9 +435,12 @@ bool handleQueryRequests(soma_manager::SOMA2QueryObjsRequest & req, soma_manager
 
             mongo::BSONObj tempObject = mainbuilder.obj();
 
-            qDebug()<<QString::fromStdString(tempObject.jsonString());
+           // qDebug()<<QString::fromStdString(tempObject.jsonString());
 
             std::vector< soma2_msgs::SOMA2Object > soma2objects =  querySOMA2Objects(tempObject);
+
+            resp.objects = soma2objects;
+            resp.queryjson = tempObject.jsonString();
 
         }
 
@@ -495,7 +498,7 @@ int main(int argc, char **argv){
     {
 
         std::cout<<
-                    "Running the query_manager_node with default arguments: MongoDB HostName:localhost, MongoDB Port:62345, ObjectsDBName: soma2data, ObjectsCollectionName:soma2, ROIDBName:soma2data"
+                    "Running the query_manager_node with default arguments: ObjectsDBName: soma2data, ObjectsCollectionName:soma2, ROIDBName:soma2data"
                  <<std::endl;
         // std::cout << "Not enough input arguments!! Quitting..."<<std::endl;
 
