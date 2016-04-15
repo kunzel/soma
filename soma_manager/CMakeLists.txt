@@ -124,6 +124,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 ## Declare a cpp executable
  add_executable(soma_query_manager_node  src/query_manager/query_manager.cpp   src/query_manager/querybuilder.h  src/query_manager/querybuilder.cpp)
+add_dependencies(soma_query_manager_node soma2_msgs_generate_messages_cpp)
 
  qt5_use_modules(soma_query_manager_node Core)
 
@@ -133,7 +134,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(soma_query_manager_node ${catkin_LIBRARIES} )
-
+add_dependencies(soma_query_manager_node soma2_msgs_generate_messages_cpp)
 #############
 ## Install ##
 #############
