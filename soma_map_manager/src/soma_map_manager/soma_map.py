@@ -57,9 +57,11 @@ class SOMA2MapManager():
                 print count," ",amap.mapname
                 count +=1
             while 1:    
-                var = raw_input("Please enter your choice (0 to load new map via an active map_server node): ")
+                var = raw_input("Please enter your choice (0 to load new map via an active map_server node, -99 to quit): ")
                 print "you entered", var
-                if(var.isdigit()):
+                if(var.isdigit() or var.startswith('-') and var[1:].isdigit()):
+		  if int(var) == -99:
+		    return False
                   if(int(var) <= len(res)):
                     if(int(var) == 0):
                        return self.listen_and_store_map()
@@ -176,7 +178,7 @@ if __name__=="__main__":
   
     
     rospy.init_node("soma_map_manager")
-    rospy.loginfo("Running SOMA2 Map Manager")
+    rospy.loginfo("Running SOMA map manager")
     SOMA2MapManager()
     
 

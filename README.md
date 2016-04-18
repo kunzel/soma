@@ -8,8 +8,9 @@ Prerequisites
 -------------
 
 - MongoDB (>=2.6)
-- mongodb_store - use this [fork](https://github.com/hkaraoguz/mongodb_store)
+- mongodb_store - use the source version from github
 - ROS's navigation stack (only map server)
+- Qt5 (sudo apt-get install qtbase5-dev)
 
 
 Getting started (general steps)
@@ -65,9 +66,9 @@ where `config` denotes an object configuration. By default, the configuration fi
 
 ROS Services
 --------
-The other nodes can communicate with SOMA2 using the SOMA2 service calls. In order to use these services, one should run the soma2 data manager:
+The other nodes can communicate with SOMA2 using the SOMA2 service calls. In order to use these services, one should run the soma data manager:
 ## SOMA data manager
-1. Run the soma2 data manager:
+1. Run the soma data manager:
 ```
 $ rosrun soma_manager data_manager.py <db_name> <collection_name>
 ```
@@ -75,6 +76,8 @@ The parameters `db_name` and `collection_name` are optional which can be used to
 ### Data insertion
 One or multiple SOMA2 objects can be inserted using the SOMA2 service call `/soma2/insert_objects`. The unique mongodb ids and a boolean value are returned. The boolean return value determines whether the request was successfully completed or not.
 ### Data deletion
-One or multiple SOMA2 objects can be deleted using the SOMA2 service call `/soma2/delete_objects`. The boolean return value determines whether the request was successfully completed or not.
+One or multiple SOMA2 objects can be deleted using the SOMA2 service call `/soma2/delete_objects`. The SOMA2 object ids are used for deletion. The boolean return value determines whether the request was successfully completed or not.
 ### Data update
 A SOMA2 object can be updated using the SOMA2 service call `/soma2/update_object`. The boolean return value determines whether the request was successfully completed or not.
+### Data query
+SOMA2 objects and ROIs could be queried using SOMA2 service call `/soma2/query_objects`. The query request should be filled according to the spatio-temporal constraints. The results are returned based on the query type and constraints.
