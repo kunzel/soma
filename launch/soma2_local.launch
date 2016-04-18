@@ -1,0 +1,14 @@
+<launch>
+	 
+	
+	<include file="$(find mongodb_store)/launch/mongodb_store.launch" >
+		<arg name="db_path" default="/home/hakan/mongodb_deneme" />
+	</include>
+
+	<node name="soma_map" pkg="soma_map_manager" type="soma_map.py" output="screen"/>
+	<arg name="db_name" default="labelled_objects" />
+	<arg name="collection_name" default="soma2" />
+	<node name="soma_data_manager" pkg="soma_manager" type="data_manager.py" args="$(arg db_name) $(arg collection_name)" output="screen"/>
+	
+   
+</launch>
