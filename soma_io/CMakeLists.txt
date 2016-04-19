@@ -81,7 +81,6 @@ catkin_python_setup()
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
-
 ## To declare and build dynamic reconfigure parameters within this
 ## package, follow these steps:
 ## * In the file package.xml:
@@ -96,8 +95,7 @@ catkin_python_setup()
 # generate_dynamic_reconfigure_options(
 #   cfg/DynReconf1.cfg
 #   cfg/DynReconf2.cfg
-# )
-
+# 
 ###################################
 ## catkin specific configuration ##
 ###################################
