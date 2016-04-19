@@ -426,6 +426,39 @@ bool handleQueryRequests(soma_manager::SOMA2QueryObjsRequest & req, soma_manager
                 }
 
             }
+            else if(req.objectids.size() > 0)
+            {
+                std::vector<std::string> fieldnames;
+                fieldnames.push_back("id");
+
+                std::vector<int> objectIndexes;
+                objectIndexes.push_back(req.objectids.size());
+
+                std::vector<std::string> list;
+
+                //   list.insert(list.end(),req.objectids.data()->begin(),req.objectids.data()->end());
+
+
+                mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(req.objectids,fieldnames,objectIndexes,"$or");
+
+
+
+                mainbuilder.appendElements(bsonobj);
+
+            }
+            else if(req.objecttypes.size() > 0)
+            {
+                std::vector<std::string> fieldnames;
+                fieldnames.push_back("type");
+
+                std::vector<int> objectIndexes;
+                objectIndexes.push_back(req.objecttypes.size());
+
+                mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(req.objecttypes,fieldnames,objectIndexes,"$or");
+
+                mainbuilder.appendElements(bsonobj);
+
+            }
 
 
 
