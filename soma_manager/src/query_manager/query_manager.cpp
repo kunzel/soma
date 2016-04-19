@@ -185,11 +185,13 @@ std::vector<std::vector<std::string> > fetchSOMA2ObjectTypesIDs()
 }
 SOMA2TimeLimits getSOMA2CollectionMinMaxTimestep()
 {
-    std::vector<int> res;
-    int min = -1;
-    int max = -1;
+
 
     SOMA2TimeLimits limits;
+    limits.mintimestamp = -1;
+    limits.mintimestep = -1;
+    limits.maxtimestamp = -1;
+    limits.maxtimestep = -1;
 
     ros::NodeHandle nl;
 
@@ -204,17 +206,21 @@ SOMA2TimeLimits getSOMA2CollectionMinMaxTimestep()
     soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),builder.obj(),false,1);
 
 
-    if(soma2objects.size() > 0)
+    if(soma2objects.size() > 0){
         limits.maxtimestep = soma2objects[0]->timestep;
-    limits.maxtimestamp = soma2objects[0]->logtimestamp;
+        limits.maxtimestamp = soma2objects[0]->logtimestamp;
+    }
     //std::cout<<soma2objects[0]->timestep<<std::endl;
 
     soma2objects.clear();
     soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),mongo::BSONObj(),false,1);
 
     if(soma2objects.size() > 0)
+    {
+
         limits.mintimestep = soma2objects[0]->timestep;
-    limits.mintimestamp = soma2objects[0]->logtimestamp;
+        limits.mintimestamp = soma2objects[0]->logtimestamp;
+    }
 
     return limits;
 
@@ -486,8 +492,11 @@ bool handleQueryRequests(soma_manager::SOMA2QueryObjsRequest & req, soma_manager
     else if(req.query_type == 1)
     {
         std::vector<std::vector<std::string> > res = fetchSOMA2ObjectTypesIDs();
-        resp.types = res[0];
-        resp.ids = res[1];
+        if(res.size()>=2)
+        {
+            resp.types = res[0];
+            resp.ids = res[1];
+        }
 
     }
     // Handle Query for rois
@@ -502,6 +511,7 @@ bool handleQueryRequests(soma_manager::SOMA2QueryObjsRequest & req, soma_manager
     else if(req.query_type == 3)
     {
         SOMA2TimeLimits res = getSOMA2CollectionMinMaxTimestep();
+
         resp.timedatelimits.push_back(res.mintimestep);
         resp.timedatelimits.push_back(res.maxtimestep);
         resp.timedatelimits.push_back(res.mintimestamp);
