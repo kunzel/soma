@@ -1,0 +1,51 @@
+int8  query_type    ### 0: perform soma2objectquery
+		    ### 1: return all types and ids
+		    ### 2: return all rois
+		    ### 3: return min-max timestep limits along with dates for the collection
+		    
+		    
+bool usetimestep    ### set timestep as a query field 
+bool uselowertime   ### use lower time limit as a query field
+bool useuppertime   ### use upper time limit as a query field
+bool usedates	    ### use dates as a query field. If the upper or lower date is 0, it is ignored. Note: If date is set as a field timestep is ignored
+bool useweekday     ### use weekday as a query field
+bool useroi	    ### use roi as a query field
+
+int32 timestep      ### Timestep field of the query
+
+uint32 lowerhour    ### lower limit of the hour
+
+uint32 upperhour    ### upper limit of the hour
+
+uint32 lowerminutes  ### lower limit of minutes
+
+uint32 upperminutes  ### upper limit of minutes
+
+uint32 lowerdate     ### lower data in timestamp format
+
+uint32 upperdate     ### upper date limit in timestamp format
+
+uint8 weekday        ### iso weekday 1-Monday 7-Sunday
+
+string[] objectids   ### array of object ids that will be queried with or statement
+
+string[] objecttypes ### array of object types that will be queried with or statement   
+
+string roi_id        ### id of the roi that will be used for within query
+
+
+---
+int32[]  timedatelimits    ### returned timestep limits timedatelimits[0] -> min-timestep
+			   ### timedatelimits[1] -> max-timestep 
+			   ### timedatelimits[2] -> min-date
+			   ### timedatelimits[3] -> max-date
+
+string[] types             ### vector of object types present in current collection
+
+string[] ids		   ### vector of object ids present in current collection
+
+soma2_msgs/SOMA2Object[] objects  ### vector of returned objects
+
+soma2_msgs/SOMA2ROIObject[] rois  ### vector of returned rois
+
+string queryjson 	   ### performed query in json format

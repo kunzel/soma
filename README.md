@@ -1,27 +1,16 @@
-soma
+SOMA2
 ====
 
-A toolbox for creating, maintaining, and querying Semantic Object Maps (SOMAs). SOMAs can include objects, regions of interest (ROI), and trajectories. 
-
-Currently there are two modeling tools: 
-
-- the SOMA object manager 
-- the SOMA ROI manager (ROI = regions of interest)
- 
-The SOMA manager for objects visualizes objects in RVIZ where the user can add, delete, move, and rotate them interactively. The SOMA manager for ROIs visualizes regions in RVIZ where the user can add, delete, and modify them. Both the object and the ROI configurations are immediately stored and updated in the ROS datacentre (MongoDB).
-
-Trajectories can be added to a SOMA using an import tool. These trajectories are generated from the output of the bayes_people_tracker in (strands_perception_people).  
-
-A query service (ROS Service) allows a caller to extract a set of trajectories based on spatial-temporal restritions. For example, a query can filter out trajectories that are near an object, within a region, or intersect with another object (region, trajectory). Additionally, temporal constraints can be specified to select only trajectories that were observed during a certain interval.   
+An enhanced version of Semantic Object Map (SOMA) package. SOMAs can include objects, regions of interest (ROI), and trajectories.
 
 
 Prerequisites
 -------------
 
-- MongoDB (>=2.4)
-- mongodb_store
+- MongoDB (>=2.6)
+- mongodb_store - use the source version from github
 - ROS's navigation stack (only map server)
-- strands_perception_people
+- Qt5 (sudo apt-get install qtbase5-dev)
 
 
 Getting started (general steps)
@@ -34,94 +23,61 @@ Getting started (general steps)
 2. Launch the ROS datacentre:
 
     ```
-    $ roslaunch mongodb_store datacentre.launch
+    $ roslaunch mongodb_store mongodb_store.launch db_path:=<path_to_db>
     ```
-3. Run the map_server with a 2D map:
+
+SOMA map manager
+----------------
+3. SOMA2 is currently based on the assumption that all the detected objects are in a 2D global map frame. So **it is required to run the soma map manager** for using SOMA2. This node is used for storing, reading and publishing 2D map:
+```
+$ rosrun soma_map_manager soma_map.py
+```
+If there are any stored 2D occupancy maps in the datacenter, then map manager will let you choose the map to be published. If not, it will wait for map_server. Run the map_server with a 2D map:
   ```
   $ rosrun map_server map_server <map.yaml>
   ```
-where `map.yaml` specifies the map you want to load.
-    
+where `map.yaml` specifies the map you want to load. After running the `map_server`, you should save the published map using the `SOMA map manager`.
 
-4. Start RVIZ, add a Map display type and subsribe to the `/map` topic:
+4. If you want to check the published map, start RVIZ, add a Map display type and subscribe to the `soma2/map` topic:
 
   ```
   $ rosrun rviz rviz
   ```
 
-SOMA object manager
--------------------
-
-5. Run the SOMA object manager:
-
-    ```
-    $ rosrun soma_manager soma.py <map> <config>
-    ```
-where `map` denotes the name of the 2D map (Step 3) and `config` denotes an object configuration within this map. By default, the configuration file `soma_objects/config/default.json` is used to initialize the list of available object types. Alternatively, the following command can be used to use a different configuration file:
-
-    ```
-    $ rosrun soma_manager soma.py -t /path/to/config/file <map> <config>
-    ```
-6. In RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma/update` topic:
-7. Add, delete, move, and rotate objects in RVIZ using the interactive marker and the context menu (right-mouse-click)
-
-![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_manager.png)
-
 SOMA ROI manager
 ----------------
 
-5. Run the SOMA ROI manager:
+5. If you want to create SOMA ROIs, run the SOMA ROI manager:
 
     ```
-    $ rosrun soma_roi_manager soma_roi.py <map> <config>
+    $ rosrun soma_roi_manager soma_roi.py <config>
     ```
-where `map` denotes the name of the 2D map (Step 3) and `config` denotes an object configuration within this map. By default, the configuration file `soma_roi_manager/config/default.json` is used to initialize the list of available ROI types. Alternatively, the following command can be used to use a different configuration file:
+where `config` denotes an object configuration. By default, the configuration file `soma_roi_manager/config/default.json` is used to initialize the list of available ROI types. Alternatively, the following command can be used to use a different configuration file:
 
     ```
-    $ rosrun soma_roi_manager soma_roi.py -t /path/to/config/file <map> <config>
+    $ rosrun soma_roi_manager soma_roi.py -t /path/to/config/file <config>
     ```
-6. In RVIZ, add an InteractiveMarker display type, and subsribe to the `/soma_roi/update` topic:
+2D `map` information will be gathered from `soma2/map_info` service of `SOMA map manager`.
+6. In RVIZ, add an InteractiveMarker display type, and subscribe to the `/soma2_roi/update` topic:
 7. Add, delete, modify ROIs in RVIZ using the interactive marker and the context menu (right-mouse-click)
 
 
 ![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_roi.png)
 
-SOMA trajectory importer
-------------------------
-
-1. Trajectories can be impoerted as follows:
-
-    ```
-    $ rosrun soma_trajectory trajectory_importer.py
-    ```
- 
-
-SOMA trajectory query service
------------------------------
-
-1. The service can be started as follows:
-
-    ```
-    $ rosrun soma_trajectory trajectory_query_service.py
-    ```
-    
-The service request includes a MongoDB query in json format and a boolean flag whether the result should be visualized (see image below). The response has a boolean error flag (in case the JSON was invalid) and list of trajectories that match the query specification. 
-
-Here is an example query:
-
-    {"loc": {"$nearSphere": { "$geometry":  
-                                              { "type" : "Point", 
-                                                "coordinates" : 
-                                                  [ -0.0002281133006505343, -4.632269674686995e-05 ] 
-                                              }, 
-                                 "$maxDistance": 1
-                            }
-            }
-    }
-   
-
- Further examples are here: https://github.com/kunzel/soma/blob/master/soma_trajectory/scripts/query_examples.py
-
-![marker](https://raw.githubusercontent.com/kunzel/soma/master/doc/images/soma_query.png)
-
-
+ROS Services
+--------
+The other nodes can communicate with SOMA2 using the SOMA2 service calls. In order to use these services, one should run the soma data manager:
+## SOMA data manager
+1. Run the soma data manager:
+```
+$ rosrun soma_manager data_manager.py <db_name> <collection_name>
+```
+The parameters `db_name` and `collection_name` are optional which can be used to define the database and collection name for data storage.
+### Data insertion
+One or multiple SOMA2 objects can be inserted using the SOMA2 service call `/soma2/insert_objects`. The unique mongodb ids and a boolean value are returned. The boolean return value determines whether the request was successfully completed or not.
+### Data deletion
+One or multiple SOMA2 objects can be deleted using the SOMA2 service call `/soma2/delete_objects`. The SOMA2 object ids are used for deletion. The boolean return value determines whether the request was successfully completed or not.
+### Data update
+A SOMA2 object can be updated using the SOMA2 service call `/soma2/update_object`. The boolean return value determines whether the request was successfully completed or not.
+### Data query
+SOMA2 objects and ROIs could be queried using SOMA2 service call `/soma2/query_objects`. The query request should be filled according to the spatio-temporal constraints. The results are returned based on the query type and constraints.
