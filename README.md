@@ -80,4 +80,4 @@ One or multiple SOMA2 objects can be deleted using the SOMA2 service call `/soma
 ### Data update
 A SOMA2 object can be updated using the SOMA2 service call `/soma2/update_object`. The boolean return value determines whether the request was successfully completed or not.
 ### Data query
-SOMA2 objects and ROIs could be queried using SOMA2 service call `/soma2/query_objects`. The query request should be filled according to the spatio-temporal constraints. The results are returned based on the query type and constraints.
+SOMA2 objects and ROIs could be queried using SOMA2 service call `/soma2/query_db`. The query request should be filled according to the spatio-temporal constraints. The results are returned based on the query type and constraints.
