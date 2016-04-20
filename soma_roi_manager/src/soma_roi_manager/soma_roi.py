@@ -191,7 +191,7 @@ class SOMAROIManager():
 
         #This is the object that we are pressing (feedback) so
         #that we can get the marker name etc..
-        rospy.loginfo("Add point: %s", feedback.marker_name)
+        rospy.loginfo("Add point from marker: %s", feedback.marker_name)
         roi_and_count = feedback.marker_name.split('_')
         #This is the roi that we are adding the point to
         roi = self._soma_obj_roi[roi_and_count[0]]
@@ -218,7 +218,7 @@ class SOMAROIManager():
         roi_and_count = feedback.marker_name.split('_')
 
         # Get the poses of the markers that belong roi
-        poses = self._soma_obj_pose[roi_and_count[0]]
+        #poses = self._soma_obj_pose[roi_and_count[0]]
 
         # Find out which marker wants to be deleted
         markerindex = roi_and_count[1]
@@ -237,13 +237,13 @@ class SOMAROIManager():
         del self._soma_obj_markers[roi][markerindex]
 
         # We delete the obj pose array to reinitialize
-        del self._soma_obj_pose[roi]
-        self._soma_obj_pose[roi] = list()
+        del self._soma_obj_pose[roi][markerindex]
+        #self._soma_obj_pose[roi] = list()
 
         #print self._soma_obj_markers[str(roi_and_count[0])]
         # Reinitializing the pose array
         for key,amarker in self._soma_obj_markers[roi].iteritems():
-            self._soma_obj_pose[roi].append(amarker.pose)
+            self._soma_obj_pose[roi][key] = amarker.pose
 
 
 
@@ -265,18 +265,23 @@ class SOMAROIManager():
         #self._soma_obj_pose[feedback.marker_name] = feedback.pose
         roi_and_count = feedback.marker_name.split('_')
 
-        del self._soma_obj_pose[roi_and_count[0]]
-        self._soma_obj_pose[roi_and_count[0]] = list()
+
 
         roi = roi_and_count[0]
         markerindex = roi_and_count[1]
 
+
+        #del self._soma_obj_pose[roi_and_count[0]][markerindex]
+        #self._soma_obj_pose[roi_and_count[0]] = list()
+
         self._soma_obj_markers[roi][markerindex].pose = feedback.pose
+
+        self._soma_obj_pose[roi_and_count[0]][markerindex] = feedback.pose
 
         #print self._soma_obj_markers[str(roi_and_count[0])]
 
-        for key,amarker in self._soma_obj_markers[roi].iteritems():
-            self._soma_obj_pose[roi].append(amarker.pose)
+    #    for key,amarker in self._soma_obj_markers[roi].iteritems():
+    #        self._soma_obj_pose[roi].append(amarker.pose)
 
 
         #roi = self._soma_obj_roi[roi_and_count[0]]
@@ -360,7 +365,12 @@ class SOMAROIManager():
 
             self._soma_obj_roi[o.id] = o.roi_id
             self._soma_obj_type[o.id] = o.type
-            self._soma_obj_pose[o.id] = o.posearray.poses
+            self._soma_obj_pose[o.id] = dict()
+            count = 1
+        #    for pose in o.posearray.poses:
+        #        self._soma_obj_pose[o.id][str(count)] = pose
+        #        count +=1
+
             self._soma_obj_markers[o.id] = dict()
 
             for pose in o.posearray.poses:
@@ -384,8 +394,17 @@ class SOMAROIManager():
         v = self._soma_obj_roi_ids[str(roicp)]
     #    print "V is ",v
         t = self._soma_obj_type[v[0]]
-        p = self._soma_obj_pose[v[0]]
+
+        pointkeys = self._soma_obj_pose[v[0]].keys()
+
+        pointkeys.sort(key=int)
+        p = list()
+        #print pointkeys
+        #p = self._soma_obj_pose[v[0]].values()
+        for akey in pointkeys:
+            p.append(self._soma_obj_pose[v[0]][akey])
         cc = 0
+        #print p
       #  print "t is ",t," p is ", p
         for pose in p:
            # print "This is the pose: ", pose
@@ -409,6 +428,8 @@ class SOMAROIManager():
         if self._soma_obj_markers[str(soma_id)].keys():
             maxkey = max(self._soma_obj_markers[str(soma_id)].keys(), key=int)
             markerno = int(maxkey)+1;
+
+        self._soma_obj_pose[str(soma_id)][str(markerno)] = pose
     #    print "marker no ",markerno
 
        # print self._soma_obj_markers[str(soma_id)]
@@ -462,6 +483,7 @@ class SOMAROIManager():
             soma_obj.header.stamp = rospy.get_rostime()
             self._soma_obj_roi_ids[str(soma_roi_id)] = list()
             self._soma_obj_markers[soma_obj.id] = dict()
+            self._soma_obj_pose[soma_obj.id] = dict()
             #_id = self._msg_store.update_id
             _id = self._msg_store.insert(soma_obj)
             self._soma_obj_ids[soma_obj.id] = _id
@@ -469,8 +491,8 @@ class SOMAROIManager():
             self._soma_obj_type[soma_obj.id] = soma_type
             self._soma_obj_roi[soma_obj.id] = roi_id
             self._soma_obj_msg[soma_obj.id] = soma_obj
-            self._soma_obj_pose[soma_obj.id] = soma_obj.posearray.poses
-
+            #self._soma_obj_pose[soma_obj.id] = soma_obj.posearray.poses
+            self._soma_obj_pose[soma_obj.id][str(1)] = pose
         else:
             # Get the roi id
             soma_roi_id = roi_id
@@ -485,10 +507,18 @@ class SOMAROIManager():
                 soma_obj = o
               #  print "Soma Object: ", soma_obj
             if soma_obj:
+                soma_id = soma_obj.id
+                self.load_object(str(soma_id), soma_obj.roi_id, soma_type, pose)
                 #soma_obj.posearray.poses.append(pose)
-
-                self._soma_obj_pose[soma_obj.id].append(pose)# = soma_obj.posearray.poses
-                soma_obj.posearray.poses = self._soma_obj_pose[soma_obj.id]
+                #size = len(self._soma_obj_pose[soma_obj.id])
+                #self._soma_obj_pose[soma_obj.id][str(size+1)] = pose
+                #self._soma_obj_pose[soma_obj.id].append(pose)# = soma_obj.posearray.poses
+                pointkeys = self._soma_obj_pose[soma_obj.id].keys()
+                pointkeys.sort(key=int)
+                #print pointkeys
+                for akey in pointkeys:
+                    soma_obj.posearray.poses.append(self._soma_obj_pose[soma_obj.id][akey])
+                #soma_obj.posearray.poses = self._soma_obj_pose[soma_obj.id].values()
 
                 self.insert_geo_json(soma_obj.roi_id,soma_obj)
 
@@ -506,9 +536,11 @@ class SOMAROIManager():
                     rospy.logerr("The polygon of %s %s is malformed (self-intersecting) => Please update geometry." % (soma_obj.type, soma_obj.roi_id))
 
 
-                soma_id = soma_obj.id
+
 
                 self._soma_obj_msg[soma_obj.id] = soma_obj
+
+                return
 
 
         self.load_object(str(soma_id), soma_obj.roi_id, soma_type, pose)
@@ -538,14 +570,21 @@ class SOMAROIManager():
             rospy.logerr("GS Store: %s %s, less then 3 points => Add more points or delete ROI." % (soma_obj.type, soma_obj.roi_id) )
             return None
         coordinates = PoseArray()
-        for pose in self._soma_obj_pose[soma_obj.roi_id]:
+
+        pointkeys = self._soma_obj_pose[soma_obj.roi_id].keys()
+
+        pointkeys.sort(key=int)
+
+
+        for akey in pointkeys:
+            pose = self._soma_obj_pose[soma_obj.roi_id][akey]
             p = copy.deepcopy(pose)
             res = coords_to_lnglat(p.position.x, p.position.y)
             p.position.x = res[0]
             p.position.y = res[1]
             coordinates.poses.append(p)
 
-        p = copy.deepcopy(self._soma_obj_pose[soma_obj.roi_id][0])
+        p = copy.deepcopy(self._soma_obj_pose[soma_obj.roi_id][pointkeys[0]])
 
         res = coords_to_lnglat(p.position.x, p.position.y)
         p.position.x = res[0]
@@ -588,7 +627,16 @@ class SOMAROIManager():
 
         new_msg = copy.deepcopy(msg)
 
-        new_msg.posearray.poses = self._soma_obj_pose[str(soma_id)]
+        pointkeys = self._soma_obj_pose[str(soma_id)].keys()
+
+        pointkeys.sort(key=int)
+
+        new_msg.posearray.poses = list()
+
+        for akey in pointkeys:
+            new_msg.posearray.poses.append(self._soma_obj_pose[str(soma_id)][akey])
+
+        #new_msg.posearray.poses = self._soma_obj_pose[str(soma_id)].values()
         self.insert_geo_json(soma_id,new_msg)
 
 
@@ -620,7 +668,17 @@ class SOMAROIManager():
         #new_msg.posearray.poses[markerindex] = feedback.pose
         #new_msg.posearray.poses.append(feedback.pose)
 
-        new_msg.posearray.poses = self._soma_obj_pose[roi]
+        pointkeys = self._soma_obj_pose[roi].keys()
+
+        pointkeys.sort(key=int)
+
+        new_msg.posearray.poses = list()
+
+        for akey in pointkeys:
+            new_msg.posearray.poses.append(self._soma_obj_pose[roi][akey])
+
+
+        #new_msg.posearray.poses = self._soma_obj_pose[roi].values()
 
         #self._soma_obj_pose[roi_and_count[0]] = new_msg.posearray.poses;
 
