@@ -189,9 +189,9 @@ if __name__=="__main__":
 
     parser.add_argument('--mapname', default=None, help='map name')
 
-    args = parser.parse_args()
+    args = parser.parse_args((rospy.myargv()[1:]))
 
-    print args.mapname
+    #print args.mapname
 
     rospy.init_node("soma_map_manager")
     rospy.loginfo("Running SOMA map manager")
