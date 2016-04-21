@@ -570,7 +570,11 @@ int main(int argc, char **argv){
 
     ROS_INFO("Waiting for SOMA Map Service...");
 
-    while(!client.exists());
+    while(!client.exists())
+    {
+        if(!ros::ok())
+            return 0;
+    }
 
     soma_map_manager::MapInfo srv;
 
