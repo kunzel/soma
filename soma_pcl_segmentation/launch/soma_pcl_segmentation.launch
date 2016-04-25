@@ -1,0 +1,7 @@
+<launch>
+
+  <node pkg="soma_pcl_segmentation" type="soma_pcl_segmentation_service.py" name="soma_pcl_segmentation_node" output="screen"/>
+
+  <node pkg="soma_pcl_segmentation" type="pcl_octomap_mapper" name="pcl_octomap_mapper_service" output="screen"/>
+
+</launch>

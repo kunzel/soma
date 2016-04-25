@@ -1,0 +1,6 @@
+string waypoint   # search at this waypoint
+string[] objects  # search objects 
+uint16[] keys     # keys of the octomap 
+int32[]  values
+---
+float64 probability 

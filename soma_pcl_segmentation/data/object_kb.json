@@ -1,0 +1,59 @@
+{
+  "asus_box" : 
+  {
+    "type" :      "AsusBox",
+    "probability": 0.8, 
+    "cost": 120.0, 
+    "labels" : {
+      "prop" : 1, 
+      "wall" : 1, 
+      "cabinet": 1, 
+      "ceiling": 1, 
+      "chair/sofa": 1, 
+      "window": 1, 
+      "floor": 1, 
+      "monitor/tv": 1, 
+      "person": 1, 
+      "shelf": 1, 
+      "table": 1
+    }
+  },
+  "jasmine_green_tea" : 
+  {
+    "type" :      "TeaBox",
+    "probability": 0.8,
+    "cost": 120.0, 
+    "labels" : {
+      "prop" : 1, 
+      "wall" : 1, 
+      "cabinet": 2, 
+      "ceiling": 1, 
+      "chair/sofa": 1, 
+      "window": 1, 
+      "floor": 1, 
+      "monitor/tv": 1, 
+      "person": 1, 
+      "shelf": 1, 
+      "table": 1
+    }
+  },
+  "yellow_toy_car" : 
+  {
+    "type" :      "ToyCar",
+    "probability": 0.8, 
+    "cost": 120.0, 
+    "labels" : {
+      "prop" : 1, 
+      "wall" : 1, 
+      "cabinet": 1, 
+      "ceiling": 1, 
+      "chair/sofa": 1, 
+      "window": 1, 
+      "floor": 1, 
+      "monitor/tv": 1, 
+      "person": 1, 
+      "shelf": 1, 
+      "table": 1
+    }
+  }
+}
