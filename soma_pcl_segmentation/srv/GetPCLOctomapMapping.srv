@@ -1,0 +1,4 @@
+geometry_msgs/Point32[] points
+octomap_msgs/Octomap octomap
+---
+uint16[] keys

@@ -1,0 +1,5 @@
+string[] waypoints # searching at these waypoints
+string[] objects # searching for these objects
+---
+float64[] probability  
+float32[] cost   
