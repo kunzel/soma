@@ -21,9 +21,9 @@ uint32 lowerminutes  ### lower limit of minutes
 
 uint32 upperminutes  ### upper limit of minutes
 
-uint32 lowerdate     ### lower data in timestamp format
+uint64 lowerdate     ### lower data in timestamp format
 
-uint32 upperdate     ### upper date limit in timestamp format
+uint64 upperdate     ### upper date limit in timestamp format
 
 uint8 weekday        ### iso weekday 1-Monday 7-Sunday
 
