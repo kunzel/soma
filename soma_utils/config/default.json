@@ -1,0 +1,15 @@
+{ 
+  "1": {   
+    "name" : "kitchen table",  
+    "pos_objects" : ["cup", "plate"]
+  },
+  "2": {
+    "name" : "kitchen counter",  
+    "neg_objects" : ["unknown"]
+  }
+  "3": {
+    "name" : "meeting room table",  
+    "pos_objects" : ["projector"],
+    "neg_objects" : ["cup"]
+    }
+}
