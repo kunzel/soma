@@ -5,11 +5,11 @@
   },
   "2": {
     "name" : "kitchen counter",  
-    "neg_objects" : ["unknown"]
-  }
+    "neg_objects" : ["cup"]
+
+  },
   "3": {
     "name" : "meeting room table",  
-    "pos_objects" : ["projector"],
-    "neg_objects" : ["cup"]
+    "neg_objects" : ["unknown"]
     }
 }
