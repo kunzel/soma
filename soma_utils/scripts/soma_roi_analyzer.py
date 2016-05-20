@@ -112,6 +112,9 @@ class SOMAROIAnalyzer():
 
         for idx, o in enumerate(res.objects):
             obj = res.objects[idx]
+            if obj.type == "person":
+                continue
+            
             if obj.type in pos_objs or (pos_objs == [] and obj.type not in neg_objs):
                 pos_res.append(obj)
             
