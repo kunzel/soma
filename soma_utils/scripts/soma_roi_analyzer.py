@@ -26,13 +26,13 @@ from datetime import datetime as dt
 
 class SOMAROIAnalyzer():
 
-    def __init__(self, config_file=None, blog=None):    
+    def __init__(self, start, end, config_file=None, blog=None):    
 
-        if blog:
-            self.blog_collection = blog
-        else:
-            self.blog_collection = 'soma_blog'
-        
+        self.start = start
+        self.end = end
+        self.startdate = dt.fromtimestamp(int(start))
+        self.enddate   = dt.fromtimestamp(int(end))
+                
         soma_srv_name = '/soma2/query_db'
         rospy.loginfo("Waiting for SOMA query service...")
         rospy.wait_for_service(soma_srv_name)
@@ -51,7 +51,10 @@ class SOMAROIAnalyzer():
         rospy.loginfo("Use KB at: %s", self._config_file)
         self._init_kb()
 
-        self.pub = rospy.Publisher('/soma_report', Image, queue_size=1)
+        if blog:
+            self.blog_collection = blog
+        else:
+            self.blog_collection = 'soma_blog'
         
 
     def _init_kb(self):
@@ -60,7 +63,7 @@ class SOMAROIAnalyzer():
             config = json.load(config_file)
             self.kb = config
 
-    def get_objects(self, roi_id, start, end):
+    def get_objects(self, roi_id):
 
         try:
             req = SOMA2QueryObjsRequest()
@@ -68,8 +71,8 @@ class SOMAROIAnalyzer():
             req.useroi = True
             req.roi_id = str(roi_id)
             req.usedates = True
-            req.lowerdate = int(start) * 1000 # MongoDB requires time in miliseconds
-            req.upperdate = int(end) * 1000 # MongoDB requires time in miliseconds
+            req.lowerdate = int(self.start) * 1000 # MongoDB requires time in miliseconds
+            req.upperdate = int(self.end) * 1000 # MongoDB requires time in miliseconds
 
             rospy.loginfo("Requesting objects")
             res = self.soma_srv(req)
@@ -124,17 +127,14 @@ class SOMAROIAnalyzer():
         return pos_res, neg_res
 
         
-    def gen_blog_entry(self, roi_id, start, end, pos_objs, neg_objs):
+    def gen_blog_entry(self, roi_id, pos_objs, neg_objs):
 
-        if int(end) > 0:
-            enddate = str(self.enddate)
-        else:
-            enddate = str(dt.fromtimestamp(self.end_))
+        print 'Region: ' + self.get_roi_name(roi_id)
 
         body = '### OBJECT REPORT\n\n'
-        body += '- **Region:** ' + self.name + '\n\n'
+        body += '- **Region:** ' + self.get_roi_name(roi_id) + '\n\n'
         body += '- **Startime:** ' + str(self.startdate) + '\n\n'
-        body += '- **Endtime:** '  + enddate  + '\n\n'
+        body += '- **Endtime:** '  + str(self.enddate)  + '\n\n'
         body += '- **Summary**: <font color="green">ALLOWED ITEMS (' + str(len(pos_objs)) + ')</font>, <font color="red">NOT-ALLOWED ITEMS (' + str(len(neg_objs)) + ')</font>\n\n'
 
 
@@ -155,7 +155,7 @@ class SOMAROIAnalyzer():
                 rospy.logerr("Object not in world model: %s, %s", idx, obj.id)
 
             # CHECK that objservation is within timeframe
-            if start < int(obs.stamp) and int(obs.stamp) < self.end_:
+            if self.start < int(obs.stamp) and int(obs.stamp) < self.end:
 
                 rgb_mask = obs.get_message("rgb_mask")
                 bridge = CvBridge()
@@ -189,7 +189,7 @@ class SOMAROIAnalyzer():
                 rospy.logerr("Object not in world model: %s, %s", idx, obj.id)
 
             # CHECK that objservation is within timeframe
-            if start < int(obs.stamp) and int(obs.stamp) < self.end_:
+            if self.start < int(obs.stamp) and int(obs.stamp) < self.end:
 
                 rgb_mask = obs.get_message("rgb_mask")
                 bridge = CvBridge()
@@ -212,22 +212,20 @@ class SOMAROIAnalyzer():
             else:
                 rospy.logerr("Ignore old observation for object: %s", obj.id)
 
-            e = RobblogEntry(title=self.name + " (" + enddate + ")", body= body )
+        if len(pos_objs) > 0 or len(neg_objs) > 0:
+            e = RobblogEntry(title=str(self.enddate) + " " + self.get_roi_name(roi_id), body= body )
             msg_store.insert(e)
 
 
-    def gen_cmdline_report(self, roi_id, start, end, pos_objs, neg_objs):
+    def gen_cmdline_report(self, roi_id, pos_objs, neg_objs):
 
         # GENERATE REPORT 
         print
         print 80 * "="
-        print "Region:", self.name
+        print "Region:", self.get_roi_name(roi_id)
         print "Start :", self.startdate
-        if int(end) > 0:
-            print "End   :", self.enddate
-        else:
-            print "End   :", dt.fromtimestamp(self.end_), "(now)"
-            print
+        print "End   :", self.enddate 
+        print
         print "POSITIVE objects:", len(pos_objs)
         for idx, obj in enumerate(pos_objs):
                 print idx, obj.type 
@@ -256,33 +254,32 @@ if __name__ == '__main__':
     start = int(args.start_time[0])
     end =   int(args.end_time[0])
 
-    # INIT ANALYSZER AND LOAD ROI-OBJ KB
-    sra = SOMAROIAnalyzer(args.kb, args.blog)
-    sra.end_= end
-    
     if  start < 0 or end < 0:
         rospy.logerr("Start and end times must be positive (unix timestamps)")
         sys.exit()
 
     if end <= start:
         rospy.logwarn("end < start: set end to NOW")
-        end = 0
-        sra.end_  = int(time.time())
-
+        end = int(time.time())
     
-    # RETRIEVE ALL OBJECTS IN ROI IN TIME INTERVAL
-    objs = sra.get_objects(roi_id, start, end)
-   
-    # CHECK WHETHER THERE ARE ANY ALLOWED OR NOT ALLOWED OBJECTS IN THE ROI
-    pos_objs, neg_objs = sra.analyze(roi_id, objs)
-
-    sra.name = sra.get_roi_name(roi_id) 
-    sra.startdate = dt.fromtimestamp(int(start))
-    sra.enddate = dt.fromtimestamp(int(end))
-        
-    if args.blog != None:
-        sra.gen_blog_entry(roi_id, start, end, pos_objs, neg_objs)
+    # INIT ANALYSZER WITH START AND END TIME, LOAD ROI-OBJ KB
+    sra = SOMAROIAnalyzer(start, end, args.kb, args.blog)
+    
+    if roi_id.upper() == 'ALL':
+        roi_ids = sra.kb.keys()
     else:
-        sra.gen_cmdline_report(roi_id, start, end, pos_objs, neg_objs)
+        roi_ids = [roi_id]
+
+    for roi_id in roi_ids:
+        # RETRIEVE ALL OBJECTS IN ROI IN TIME INTERVAL
+        objs = sra.get_objects(roi_id)
+   
+        # CHECK WHETHER THERE ARE ANY ALLOWED OR NOT ALLOWED OBJECTS IN THE ROI
+        pos_objs, neg_objs = sra.analyze(roi_id, objs)
+
+        if args.blog != None:
+            sra.gen_blog_entry(roi_id, pos_objs, neg_objs)
+        else:
+            sra.gen_cmdline_report(roi_id, pos_objs, neg_objs)
 
         
