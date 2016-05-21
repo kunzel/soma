@@ -1,15 +1,23 @@
 { 
-  "1": {   
-    "name" : "kitchen table",  
-    "pos_objects" : ["cup", "plate"]
+  "8": {   
+    "name" : "pod-1",  
+    "neg_objects" : ["unknown"]
   },
-  "2": {
-    "name" : "kitchen counter",  
-    "neg_objects" : ["cup"]
+  "9": {
+    "name" : "table-1",  
+    "pos_objects" : ["unknown"]
 
   },
-  "3": {
-    "name" : "meeting room table",  
-    "neg_objects" : ["unknown"]
-    }
+  "10": {
+    "name" : "pod-2",  
+    "pos_objects" : ["unknown"]
+  },
+  "11": {   
+    "name" : "table-2",  
+    "pos_objects" : ["unknown"]
+  },
+  "12": {
+    "name" : "pod-3",  
+    "pos_objects" : ["unknown"]
+  }
 }

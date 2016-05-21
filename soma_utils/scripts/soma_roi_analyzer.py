@@ -168,7 +168,7 @@ class SOMAROIAnalyzer():
                 bridge = CvBridge()
                 cv_image = bridge.imgmsg_to_cv2(full_scene, desired_encoding="bgr8")
 
-                cv2.drawContours(cv_image,contours,-1,(0,255,0),3)
+                cv2.drawContours(cv_image,contours,-1,(0,255,0),2)
                 full_scene_contour = bridge.cv2_to_imgmsg(cv_image)
 
                 #success = cv2.imwrite(obj.id+'.jpeg',cv_image)
@@ -202,7 +202,7 @@ class SOMAROIAnalyzer():
                 bridge = CvBridge()
                 cv_image = bridge.imgmsg_to_cv2(full_scene, desired_encoding="bgr8")
 
-                cv2.drawContours(cv_image,contours,-1,(0,255,0),3)
+                cv2.drawContours(cv_image,contours,-1,(0,0,255),2)
                 full_scene_contour = bridge.cv2_to_imgmsg(cv_image)
 
                 #success = cv2.imwrite(obj.id+'.jpeg',cv_image)
