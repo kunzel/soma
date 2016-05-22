@@ -19,5 +19,8 @@
   "12": {
     "name" : "pod-3",  
     "pos_objects" : ["unknown"]
+  },
+  "22": {
+    "name" : "BHAM_LG"
   }
 }
