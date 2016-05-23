@@ -33,7 +33,7 @@ class SOMAMapManager():
         self.map_unique_id = -1
         self.soma2map = SOMA2OccupancyMap()
 
-        self.pub = rospy.Publisher('soma2/map', OccupancyGrid, queue_size=1)
+        self.pub = rospy.Publisher('soma2/map', OccupancyGrid, queue_size=1, latch=True)
 
         self._map_store=MessageStoreProxy(database="maps", collection="soma2")
 
@@ -121,10 +121,10 @@ class SOMAMapManager():
             return False
 
     def run_node(self):
-           rate = rospy.Rate(10) # 10hz
+           rate = rospy.Rate(1) # 1hz
            print "map is now being published on soma2/map topic"
+           self.pub.publish(self.soma2map.map)
            while not rospy.is_shutdown():
-                self.pub.publish(self.soma2map.map)
                 rate.sleep()
     def rlencode(self,src):
         result = []
