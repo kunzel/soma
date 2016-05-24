@@ -118,11 +118,12 @@ class SOMAROIAnalyzer():
             if obj.type == "person":
                 continue
             
-            if obj.type in pos_objs or (pos_objs == [] and obj.type not in neg_objs):
+            if obj.type in neg_objs or (neg_objs == [] and obj.type not in pos_objs):
+                neg_res.append(obj)
+
+            elif obj.type in pos_objs or (pos_objs == [] and obj.type not in neg_objs):
                 pos_res.append(obj)
             
-            elif obj.type in neg_objs or (neg_objs == [] and obj.type not in pos_objs):
-                neg_res.append(obj)
 
         return pos_res, neg_res
 
