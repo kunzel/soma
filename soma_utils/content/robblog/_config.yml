@@ -1,0 +1,12 @@
+# Site settings
+title: SOMA Blog 
+email: strands-bham@cs.bham.ac.uk
+description: > # this means to ignore newlines until "baseurl:"
+     STRANDS will produce intelligent mobile robots that are able to run for months in dynamic human environments. 
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://yourdomain.com" # the base hostname & protocol for your site
+twitter_username: strands_project
+github_username:  strands-project
+
+# Build settings
+markdown: kramdown
