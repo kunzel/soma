@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+
 import rospy
 import argparse
+import sys
 
-from data_manager import SOMADataManager
+from soma_manager.data_manager import SOMADataManager
 
 if __name__=="__main__":
 
@@ -20,7 +23,7 @@ if __name__=="__main__":
            SOMADataManager(args.db_name,args.collection_name)
         else:
             rospy.loginfo("Running SOMA data manager (dbname: %s, collection_name: soma2)", args.db_name)
-           SOMADataManager(args.db_name)
+            SOMADataManager(args.db_name)
     else:
         rospy.loginfo("Running SOMA data manager (dbname: soma2data, collection_name: soma2)")
         SOMADataManager()

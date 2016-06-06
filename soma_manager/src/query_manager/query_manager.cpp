@@ -203,8 +203,7 @@ SOMA2TimeLimits getSOMA2CollectionMinMaxTimestep()
 
     std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
 
-    soma2store.query(soma2objects,mongo::BSONObj(),builder.obj(),false,1);
-
+    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),builder.obj(),false,1);
 
     if(soma2objects.size() > 0){
         limits.maxtimestep = soma2objects[0]->timestep;
@@ -213,7 +212,7 @@ SOMA2TimeLimits getSOMA2CollectionMinMaxTimestep()
     //std::cout<<soma2objects[0]->timestep<<std::endl;
 
     soma2objects.clear();
-    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),false,1);
+    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),mongo::BSONObj(),false,1);
 
     if(soma2objects.size() > 0)
     {
