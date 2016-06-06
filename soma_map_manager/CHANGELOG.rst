@@ -2,8 +2,8 @@
 Changelog for package soma_map_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2016-06-06)
+------------------
 * Updated package xml files.
 * Big restucture for release
 * Improving structure of soma_map_manager for release.

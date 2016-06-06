@@ -2,8 +2,8 @@
 Changelog for package soma_io
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2016-06-06)
+------------------
 * Updated package xml files.
 * integrates latest world_state code
 * integrates latest world_state code

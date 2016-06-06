@@ -2,8 +2,8 @@
 Changelog for package soma_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2016-06-06)
+------------------
 * Updated package xml files.
 * make negative/no-allowed object default
 * add about text

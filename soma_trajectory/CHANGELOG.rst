@@ -2,8 +2,8 @@
 Changelog for package soma2_trajectory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2016-06-06)
+------------------
 * Updated package xml files.
 * Latest soma2 is merged into soma fork named as soma
 * Contributors: Nick Hawes, hkaraoguz

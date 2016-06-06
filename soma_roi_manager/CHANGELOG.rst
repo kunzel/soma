@@ -2,8 +2,8 @@
 Changelog for package soma_roi_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2016-06-06)
+------------------
 * Updated package xml files.
 * Added missing import
 * Big restucture for release
