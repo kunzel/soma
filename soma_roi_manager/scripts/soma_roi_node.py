@@ -2,6 +2,7 @@
 
 import rospy
 import argparse
+import sys
 
 from soma_roi_manager.soma_roi import SOMAROIManager
 
