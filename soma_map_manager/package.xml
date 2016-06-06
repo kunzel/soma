@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>soma_map_manager</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>The soma2_map_manager package</description>
 
   <maintainer email="hkarao@kth.se">Hakan Karaoguz</maintainer>
