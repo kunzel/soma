@@ -1,14 +1,13 @@
 <launch>
 	 
-	<!-- Uncomment these lines if mongodb is not already running -->
-	<!--<include file="$(find mongodb_store)/launch/mongodb_store.launch" >-->
-		<!--<arg name="db_path" default="/home/hakan/mongodb_deneme" />-->
-	<!--</include> -->
-	<arg name="map_name" default="None" />
-	<node name="soma_map" pkg="soma_map_manager" type="soma_map.py" args="--mapname $(arg map_name)" output="screen"/>
+	<arg name="map_name"/>
 	<arg name="db_name" default="soma2data" />
 	<arg name="collection_name" default="soma2" />
+
+	<node name="soma_map" pkg="soma_map_manager" type="soma_map.py" args="--mapname $(arg map_name)" output="screen"/>
+
 	<node name="soma_data_manager" pkg="soma_manager" type="data_manager.py" args="$(arg db_name) $(arg collection_name)" output="screen"/>
+
 	<node name="soma_query_manager_node" pkg="soma_manager" type="soma_query_manager_node" args="$(arg db_name) $(arg collection_name)" output="screen"/>
 	
    

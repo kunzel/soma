@@ -22,7 +22,7 @@ mongo::BSONObj QueryBuilder::buildSOMA2LabelContainsQuery(const std::string &tex
 
 
 }
-mongo::BSONObj QueryBuilder::buildSOMA2DateQuery(ulong lowerdate, ulong upperdate, int mode)
+mongo::BSONObj QueryBuilder::buildSOMA2DateQuery(unsigned long lowerdate, unsigned long upperdate, int mode)
 {
     mongo::BSONObjBuilder builder;
 

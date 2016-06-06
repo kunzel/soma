@@ -18,7 +18,7 @@ public:
 
     static mongo::BSONObj buildSOMA2WeekdayQuery(int index);
 
-    static mongo::BSONObj buildSOMA2DateQuery(ulong lowerdate, ulong upperdate, int mode);
+    static mongo::BSONObj buildSOMA2DateQuery(unsigned long lowerdate, unsigned long upperdate, int mode);
 
     static mongo::BSONObj buildSOMA2TimeQuery(int lowerhour,int lowerminute, int upperhour, int upperminute,  int mode);
 
