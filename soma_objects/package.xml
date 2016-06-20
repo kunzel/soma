@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>soma_objects</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <description>The soma_objects package</description>
 
   <maintainer email="L.Kunze@cs.bham.ac.uk">Lars Kunze</maintainer>
