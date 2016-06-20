@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   nav_msgs
   std_msgs
+  soma_map_manager
 )
 find_package(Qt5Core)
 ## System dependencies are found with CMake's conventions
