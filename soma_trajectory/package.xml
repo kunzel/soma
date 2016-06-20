@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>soma2_trajectory</name>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <description>The soma2_trajectory package</description>
 
   <maintainer email="L.Kunze@cs.bham.ac.uk">Lars Kunze</maintainer>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>soma_manager</name>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <description>The soma_manager package</description>
 
   <maintainer email="hkarao@kth.se">Hakan Karaoguz</maintainer>

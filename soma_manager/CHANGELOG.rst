@@ -2,8 +2,8 @@
 Changelog for package soma_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.4 (2016-06-20)
+------------------
 * added soma_map_manager as dependency (`#48 <https://github.com/strands-project/soma/issues/48>`_)
 * Contributors: Marc Hanheide
 
