@@ -23,7 +23,7 @@ find_package(Qt5Core)
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -133,8 +133,9 @@ add_dependencies(soma_query_manager_node soma2_msgs_generate_messages_cpp soma_m
 # add_dependencies(soma_manager_node soma_manager_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(soma_query_manager_node ${catkin_LIBRARIES} )
+target_link_libraries(soma_query_manager_node ${catkin_LIBRARIES} )
 add_dependencies(soma_query_manager_node soma2_msgs_generate_messages_cpp)
+
 #############
 ## Install ##
 #############
@@ -142,19 +143,23 @@ add_dependencies(soma_query_manager_node soma2_msgs_generate_messages_cpp)
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(DIRECTORY scripts/
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        USE_SOURCE_PERMISSIONS)
 
-## Mark executables and/or libraries for installation
-# install(TARGETS soma_manager soma_manager_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+# Mark other files for installation (e.g. launch and bag files, etc.)
+install(
+  DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+
+# Mark executables and/or libraries for installation
+install(TARGETS soma_query_manager_node 
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/

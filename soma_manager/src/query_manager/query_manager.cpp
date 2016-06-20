@@ -205,7 +205,6 @@ SOMA2TimeLimits getSOMA2CollectionMinMaxTimestep()
 
     soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),builder.obj(),false,1);
 
-
     if(soma2objects.size() > 0){
         limits.maxtimestep = soma2objects[0]->timestep;
         limits.maxtimestamp = soma2objects[0]->logtimestamp;
