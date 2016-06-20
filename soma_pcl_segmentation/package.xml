@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>soma_pcl_segmentation</name>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
   <description>The soma_pcl_segmentation package</description>
 
   <maintainer email="L.Kunze@cs.bham.ac.uk">Lars Kunze</maintainer>

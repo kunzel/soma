@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>soma_manager</name>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
   <description>The soma_manager package</description>
 
   <maintainer email="hkarao@kth.se">Hakan Karaoguz</maintainer>
@@ -21,6 +21,9 @@
   <build_depend>nav_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>libqt5-core</build_depend>
+  <build_depend>qtbase5-dev</build_depend>
+  
   <run_depend>interactive_markers</run_depend>
   <run_depend>mongodb_store</run_depend>
   <run_depend>rospy</run_depend>
@@ -33,6 +36,8 @@
   <run_depend>nav_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>libqt5-core</run_depend>
+  <run_depend>qtbase5-dev</run_depend>
 
 
 </package>
