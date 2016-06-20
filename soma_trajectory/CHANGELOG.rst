@@ -2,6 +2,9 @@
 Changelog for package soma2_trajectory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.3 (2016-06-20)
 ------------------
 * Marc hanheide patch for release (`#44 <https://github.com/strands-project/soma/issues/44>`_)
