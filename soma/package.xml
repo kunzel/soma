@@ -20,6 +20,20 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
+
+  <run_depend>soma_geospatial_store</run_depend>  
+  <run_depend>soma_pcl_segmentation</run_depend>
+  <run_depend>occupancy_maps</run_depend>  
+  <run_depend>soma_io</run_depend>                
+  <run_depend>soma_roi_manager</run_depend>
+  <run_depend>soma_manager</run_depend>
+  <run_depend>soma_trajectory</run_depend>
+  <run_depend>soma_map_manager</run_depend>
+  <run_depend>soma_utils</run_depend>
+  <run_depend>soma2_msgs</run_depend>      
+  <run_depend>soma_objects</run_depend>
+  <run_depend>world_state_importer</run_depend>
+
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
